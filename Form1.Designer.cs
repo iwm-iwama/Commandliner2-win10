@@ -62,20 +62,21 @@
 			this.CmsCmd_カーソルより後をクリア = new System.Windows.Forms.ToolStripMenuItem();
 			this.CmsCmd_L1 = new System.Windows.Forms.ToolStripSeparator();
 			this.CmsCmd_貼り付け = new System.Windows.Forms.ToolStripMenuItem();
-			this.BtnResultFont = new System.Windows.Forms.Button();
 			this.BtnResultUndo = new System.Windows.Forms.Button();
 			this.BtnResultCash = new System.Windows.Forms.Button();
 			this.BtnCmdClear = new System.Windows.Forms.Button();
 			this.BtnResultClear = new System.Windows.Forms.Button();
 			this.TbCurDir = new System.Windows.Forms.TextBox();
-			this.BtnResultBgColor = new System.Windows.Forms.Button();
+			this.CmsNull = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.ToolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.LblCurTb = new System.Windows.Forms.Label();
-			this.CmsNull = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.NumericUpDown1 = new System.Windows.Forms.NumericUpDown();
+			this.Lbl2 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.Dgv2)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.Dgv1)).BeginInit();
 			this.CmsResult.SuspendLayout();
 			this.CmsCmd.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.NumericUpDown1)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// BtnCmdExec
@@ -456,23 +457,6 @@
 			this.CmsCmd_貼り付け.Text = "貼り付け";
 			this.CmsCmd_貼り付け.Click += new System.EventHandler(this.CmsCmd_貼り付け_Click);
 			// 
-			// BtnResultFont
-			// 
-			this.BtnResultFont.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.BtnResultFont.BackColor = System.Drawing.Color.DimGray;
-			this.BtnResultFont.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.BtnResultFont.Font = new System.Drawing.Font("ＭＳ Ｐゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-			this.BtnResultFont.ForeColor = System.Drawing.Color.White;
-			this.BtnResultFont.Location = new System.Drawing.Point(10, 405);
-			this.BtnResultFont.Margin = new System.Windows.Forms.Padding(0);
-			this.BtnResultFont.Name = "BtnResultFont";
-			this.BtnResultFont.Size = new System.Drawing.Size(65, 24);
-			this.BtnResultFont.TabIndex = 10;
-			this.BtnResultFont.TabStop = false;
-			this.BtnResultFont.Text = "フォント";
-			this.BtnResultFont.UseVisualStyleBackColor = false;
-			this.BtnResultFont.Click += new System.EventHandler(this.BtnResultFont_Click);
-			// 
 			// BtnResultUndo
 			// 
 			this.BtnResultUndo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -561,20 +545,10 @@
 			this.TbCurDir.WordWrap = false;
 			this.TbCurDir.Click += new System.EventHandler(this.TbCurDir_Click);
 			// 
-			// BtnResultBgColor
+			// CmsNull
 			// 
-			this.BtnResultBgColor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.BtnResultBgColor.BackColor = System.Drawing.Color.GhostWhite;
-			this.BtnResultBgColor.Font = new System.Drawing.Font("ＭＳ Ｐゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-			this.BtnResultBgColor.ForeColor = System.Drawing.Color.Black;
-			this.BtnResultBgColor.Location = new System.Drawing.Point(80, 405);
-			this.BtnResultBgColor.Margin = new System.Windows.Forms.Padding(0);
-			this.BtnResultBgColor.Name = "BtnResultBgColor";
-			this.BtnResultBgColor.Size = new System.Drawing.Size(24, 24);
-			this.BtnResultBgColor.TabIndex = 11;
-			this.BtnResultBgColor.TabStop = false;
-			this.BtnResultBgColor.UseVisualStyleBackColor = false;
-			this.BtnResultBgColor.Click += new System.EventHandler(this.BtnResultBgColor_Click);
+			this.CmsNull.Name = "contextMenuStrip0";
+			this.CmsNull.Size = new System.Drawing.Size(61, 4);
 			// 
 			// ToolTip1
 			// 
@@ -598,10 +572,52 @@
 			this.LblCurTb.Text = "●";
 			this.LblCurTb.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
-			// CmsNull
+			// NumericUpDown1
 			// 
-			this.CmsNull.Name = "contextMenuStrip0";
-			this.CmsNull.Size = new System.Drawing.Size(61, 4);
+			this.NumericUpDown1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.NumericUpDown1.BackColor = System.Drawing.Color.DimGray;
+			this.NumericUpDown1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.NumericUpDown1.Cursor = System.Windows.Forms.Cursors.Default;
+			this.NumericUpDown1.Font = new System.Drawing.Font("ＭＳ ゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.NumericUpDown1.ForeColor = System.Drawing.Color.White;
+			this.NumericUpDown1.Location = new System.Drawing.Point(90, 408);
+			this.NumericUpDown1.Margin = new System.Windows.Forms.Padding(0);
+			this.NumericUpDown1.Maximum = new decimal(new int[] {
+            288,
+            0,
+            0,
+            0});
+			this.NumericUpDown1.Minimum = new decimal(new int[] {
+            9,
+            0,
+            0,
+            0});
+			this.NumericUpDown1.Name = "NumericUpDown1";
+			this.NumericUpDown1.ReadOnly = true;
+			this.NumericUpDown1.Size = new System.Drawing.Size(45, 20);
+			this.NumericUpDown1.TabIndex = 11;
+			this.NumericUpDown1.TabStop = false;
+			this.NumericUpDown1.Value = new decimal(new int[] {
+            9,
+            0,
+            0,
+            0});
+			this.NumericUpDown1.ValueChanged += new System.EventHandler(this.NumericUpDown1_ValueChanged);
+			// 
+			// Lbl2
+			// 
+			this.Lbl2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.Lbl2.AutoSize = true;
+			this.Lbl2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.Lbl2.Font = new System.Drawing.Font("ＭＳ Ｐゴシック", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.Lbl2.ForeColor = System.Drawing.Color.Snow;
+			this.Lbl2.Location = new System.Drawing.Point(8, 410);
+			this.Lbl2.Margin = new System.Windows.Forms.Padding(0);
+			this.Lbl2.Name = "Lbl2";
+			this.Lbl2.Size = new System.Drawing.Size(79, 14);
+			this.Lbl2.TabIndex = 10;
+			this.Lbl2.Text = "フォントサイズ";
+			this.Lbl2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// Form1
 			// 
@@ -609,14 +625,14 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.DimGray;
 			this.ClientSize = new System.Drawing.Size(584, 441);
+			this.Controls.Add(this.NumericUpDown1);
+			this.Controls.Add(this.Lbl2);
 			this.Controls.Add(this.Dgv1);
 			this.Controls.Add(this.Dgv2);
 			this.Controls.Add(this.TbResult);
 			this.Controls.Add(this.BtnResultUndo);
 			this.Controls.Add(this.BtnResultCash);
 			this.Controls.Add(this.BtnResultClear);
-			this.Controls.Add(this.BtnResultBgColor);
-			this.Controls.Add(this.BtnResultFont);
 			this.Controls.Add(this.TbCurDir);
 			this.Controls.Add(this.TbCmd);
 			this.Controls.Add(this.BtnCmdSelectFile);
@@ -641,6 +657,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.Dgv1)).EndInit();
 			this.CmsResult.ResumeLayout(false);
 			this.CmsCmd.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.NumericUpDown1)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -661,7 +678,6 @@
 		private System.Windows.Forms.ToolStripMenuItem CmsResult_コピー;
 		private System.Windows.Forms.ToolStripMenuItem CmsResult_貼り付け;
 		private System.Windows.Forms.TextBox TbCmd;
-		private System.Windows.Forms.Button BtnResultFont;
 		private System.Windows.Forms.Button BtnResultUndo;
 		private System.Windows.Forms.Button BtnResultCash;
 		private System.Windows.Forms.Button BtnCmdClear;
@@ -671,7 +687,6 @@
 		private System.Windows.Forms.ToolStripMenuItem CmsResult_カーソルより前をクリア;
 		private System.Windows.Forms.ToolStripMenuItem CmsResult_カーソルより後をクリア;
 		private System.Windows.Forms.TextBox TbCurDir;
-		private System.Windows.Forms.Button BtnResultBgColor;
 		private System.Windows.Forms.ToolStripSeparator CmsResult_L4;
 		private System.Windows.Forms.ToolStripMenuItem CmsResult_名前を付けて保存;
 		private System.Windows.Forms.ToolStripMenuItem CmsResult_名前を付けて保存_ShiftJIS;
@@ -690,6 +705,8 @@
 		private System.Windows.Forms.DataGridViewTextBoxColumn Dgv_Tbc21;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Dgv_Tbc22;
 		private System.Windows.Forms.ContextMenuStrip CmsNull;
+		private System.Windows.Forms.NumericUpDown NumericUpDown1;
+		private System.Windows.Forms.Label Lbl2;
 	}
 }
 

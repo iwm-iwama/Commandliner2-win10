@@ -145,6 +145,9 @@ namespace iwm_commandliner
 			{
 				_ = Dgv2.Rows.Add(ACmd[_i1, 0], ACmd[_i1, 1]);
 			}
+
+			// フォントサイズ
+			NumericUpDown1.Value = (int)Math.Round(TbResult.Font.Size);
 		}
 
 		private void Form1_SizeChanged(object sender, EventArgs e)
@@ -1116,57 +1119,12 @@ namespace iwm_commandliner
 			SubTextBoxToSaveFile(TbResult, CmsResult_名前を付けて保存_UTF8N.Text);
 		}
 
-		//---------------
-		// フォント変更
-		//---------------
-		private void BtnResultFont_Click(object sender, EventArgs e)
+		//-----------------
+		// フォントサイズ
+		//-----------------
+		private void NumericUpDown1_ValueChanged(object sender, EventArgs e)
 		{
-			SubFontChage(TbResult);
-		}
-
-		private void SubFontChage(
-			TextBox tb
-		)
-		{
-			FontDialog fd = new FontDialog
-			{
-				Font = tb.Font,
-				Color = tb.ForeColor,
-				MinSize = 9,
-				MaxSize = 600,
-				FontMustExist = true,
-				AllowVerticalFonts = false,
-				ShowColor = true,
-				ShowEffects = true,
-				FixedPitchOnly = false,
-				AllowVectorFonts = true
-			};
-
-			if (fd.ShowDialog() == DialogResult.OK)
-			{
-				tb.Font = fd.Font;
-				tb.ForeColor = fd.Color;
-			}
-		}
-
-		//---------
-		// 背景色
-		//---------
-		private void BtnResultBgColor_Click(object sender, EventArgs e)
-		{
-			Color B = Color.Black;
-			Color W = Color.GhostWhite;
-
-			if (BtnResultBgColor.BackColor == W)
-			{
-				BtnResultBgColor.BackColor = B;
-				TbResult.BackColor = W;
-			}
-			else
-			{
-				BtnResultBgColor.BackColor = W;
-				TbResult.BackColor = B;
-			}
+			TbResult.Font = new Font(TbResult.Font.Name.ToString(), (float)NumericUpDown1.Value);
 		}
 
 		//---------

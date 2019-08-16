@@ -297,13 +297,13 @@
             this.CmsResult_L4,
             this.CmsResult_名前を付けて保存});
 			this.CmsResult.Name = "CmsResult";
-			this.CmsResult.Size = new System.Drawing.Size(175, 226);
+			this.CmsResult.Size = new System.Drawing.Size(209, 226);
 			// 
 			// CmsResult_上へ
 			// 
 			this.CmsResult_上へ.ForeColor = System.Drawing.Color.OrangeRed;
 			this.CmsResult_上へ.Name = "CmsResult_上へ";
-			this.CmsResult_上へ.Size = new System.Drawing.Size(174, 22);
+			this.CmsResult_上へ.Size = new System.Drawing.Size(208, 22);
 			this.CmsResult_上へ.Text = "▲";
 			this.CmsResult_上へ.Click += new System.EventHandler(this.CmsResult_上へ_Click);
 			// 
@@ -311,71 +311,71 @@
 			// 
 			this.CmsResult_下へ.ForeColor = System.Drawing.Color.OrangeRed;
 			this.CmsResult_下へ.Name = "CmsResult_下へ";
-			this.CmsResult_下へ.Size = new System.Drawing.Size(174, 22);
+			this.CmsResult_下へ.Size = new System.Drawing.Size(208, 22);
 			this.CmsResult_下へ.Text = "▼";
 			this.CmsResult_下へ.Click += new System.EventHandler(this.CmsResult_下へ_Click);
 			// 
 			// CmsResult_L1
 			// 
 			this.CmsResult_L1.Name = "CmsResult_L1";
-			this.CmsResult_L1.Size = new System.Drawing.Size(171, 6);
+			this.CmsResult_L1.Size = new System.Drawing.Size(205, 6);
 			// 
 			// CmsResult_カーソルより前をクリア
 			// 
 			this.CmsResult_カーソルより前をクリア.Name = "CmsResult_カーソルより前をクリア";
-			this.CmsResult_カーソルより前をクリア.Size = new System.Drawing.Size(174, 22);
+			this.CmsResult_カーソルより前をクリア.Size = new System.Drawing.Size(208, 22);
 			this.CmsResult_カーソルより前をクリア.Text = "カーソルより前をクリア";
 			this.CmsResult_カーソルより前をクリア.Click += new System.EventHandler(this.CmsResult_カーソルより前をクリア_Click);
 			// 
 			// CmsResult_カーソルより後をクリア
 			// 
 			this.CmsResult_カーソルより後をクリア.Name = "CmsResult_カーソルより後をクリア";
-			this.CmsResult_カーソルより後をクリア.Size = new System.Drawing.Size(174, 22);
+			this.CmsResult_カーソルより後をクリア.Size = new System.Drawing.Size(208, 22);
 			this.CmsResult_カーソルより後をクリア.Text = "カーソルより後をクリア";
 			this.CmsResult_カーソルより後をクリア.Click += new System.EventHandler(this.CmsResult_カーソルより後をクリア_Click);
 			// 
 			// CmsResult_L2
 			// 
 			this.CmsResult_L2.Name = "CmsResult_L2";
-			this.CmsResult_L2.Size = new System.Drawing.Size(171, 6);
+			this.CmsResult_L2.Size = new System.Drawing.Size(205, 6);
 			// 
 			// CmsResult_全選択
 			// 
 			this.CmsResult_全選択.Name = "CmsResult_全選択";
-			this.CmsResult_全選択.Size = new System.Drawing.Size(174, 22);
+			this.CmsResult_全選択.Size = new System.Drawing.Size(208, 22);
 			this.CmsResult_全選択.Text = "全選択";
 			this.CmsResult_全選択.Click += new System.EventHandler(this.CmsResult_全選択_Click);
 			// 
 			// CmsResult_L3
 			// 
 			this.CmsResult_L3.Name = "CmsResult_L3";
-			this.CmsResult_L3.Size = new System.Drawing.Size(171, 6);
+			this.CmsResult_L3.Size = new System.Drawing.Size(205, 6);
 			// 
 			// CmsResult_切り取り
 			// 
 			this.CmsResult_切り取り.Name = "CmsResult_切り取り";
-			this.CmsResult_切り取り.Size = new System.Drawing.Size(174, 22);
+			this.CmsResult_切り取り.Size = new System.Drawing.Size(208, 22);
 			this.CmsResult_切り取り.Text = "切り取り";
 			this.CmsResult_切り取り.Click += new System.EventHandler(this.CmsResult_切り取り_Click);
 			// 
 			// CmsResult_コピー
 			// 
 			this.CmsResult_コピー.Name = "CmsResult_コピー";
-			this.CmsResult_コピー.Size = new System.Drawing.Size(174, 22);
+			this.CmsResult_コピー.Size = new System.Drawing.Size(208, 22);
 			this.CmsResult_コピー.Text = "コピー";
 			this.CmsResult_コピー.Click += new System.EventHandler(this.CmsResult_コピー_Click);
 			// 
 			// CmsResult_貼り付け
 			// 
 			this.CmsResult_貼り付け.Name = "CmsResult_貼り付け";
-			this.CmsResult_貼り付け.Size = new System.Drawing.Size(174, 22);
+			this.CmsResult_貼り付け.Size = new System.Drawing.Size(208, 22);
 			this.CmsResult_貼り付け.Text = "貼り付け";
 			this.CmsResult_貼り付け.Click += new System.EventHandler(this.CmsResult_貼り付け_Click);
 			// 
 			// CmsResult_L4
 			// 
 			this.CmsResult_L4.Name = "CmsResult_L4";
-			this.CmsResult_L4.Size = new System.Drawing.Size(171, 6);
+			this.CmsResult_L4.Size = new System.Drawing.Size(205, 6);
 			// 
 			// CmsResult_名前を付けて保存
 			// 
@@ -383,20 +383,20 @@
             this.CmsResult_名前を付けて保存_ShiftJIS,
             this.CmsResult_名前を付けて保存_UTF8N});
 			this.CmsResult_名前を付けて保存.Name = "CmsResult_名前を付けて保存";
-			this.CmsResult_名前を付けて保存.Size = new System.Drawing.Size(174, 22);
+			this.CmsResult_名前を付けて保存.Size = new System.Drawing.Size(208, 22);
 			this.CmsResult_名前を付けて保存.Text = "名前を付けて保存";
 			// 
 			// CmsResult_名前を付けて保存_ShiftJIS
 			// 
 			this.CmsResult_名前を付けて保存_ShiftJIS.Name = "CmsResult_名前を付けて保存_ShiftJIS";
-			this.CmsResult_名前を付けて保存_ShiftJIS.Size = new System.Drawing.Size(116, 22);
+			this.CmsResult_名前を付けて保存_ShiftJIS.Size = new System.Drawing.Size(128, 22);
 			this.CmsResult_名前を付けて保存_ShiftJIS.Text = "Shift_JIS";
 			this.CmsResult_名前を付けて保存_ShiftJIS.Click += new System.EventHandler(this.CmsResult_名前を付けて保存_ShiftJIS_Click);
 			// 
 			// CmsResult_名前を付けて保存_UTF8N
 			// 
 			this.CmsResult_名前を付けて保存_UTF8N.Name = "CmsResult_名前を付けて保存_UTF8N";
-			this.CmsResult_名前を付けて保存_UTF8N.Size = new System.Drawing.Size(116, 22);
+			this.CmsResult_名前を付けて保存_UTF8N.Size = new System.Drawing.Size(128, 22);
 			this.CmsResult_名前を付けて保存_UTF8N.Text = "UTF-8N";
 			this.CmsResult_名前を付けて保存_UTF8N.Click += new System.EventHandler(this.CmsResult_名前を付けて保存_UTF8N_Click);
 			// 
@@ -429,31 +429,31 @@
             this.CmsCmd_L1,
             this.CmsCmd_貼り付け});
 			this.CmsCmd.Name = "CmsResult";
-			this.CmsCmd.Size = new System.Drawing.Size(175, 76);
+			this.CmsCmd.Size = new System.Drawing.Size(209, 76);
 			// 
 			// CmsCmd_カーソルより前をクリア
 			// 
 			this.CmsCmd_カーソルより前をクリア.Name = "CmsCmd_カーソルより前をクリア";
-			this.CmsCmd_カーソルより前をクリア.Size = new System.Drawing.Size(174, 22);
+			this.CmsCmd_カーソルより前をクリア.Size = new System.Drawing.Size(208, 22);
 			this.CmsCmd_カーソルより前をクリア.Text = "カーソルより前をクリア";
 			this.CmsCmd_カーソルより前をクリア.Click += new System.EventHandler(this.CmsCmd_カーソルより前をクリア_Click);
 			// 
 			// CmsCmd_カーソルより後をクリア
 			// 
 			this.CmsCmd_カーソルより後をクリア.Name = "CmsCmd_カーソルより後をクリア";
-			this.CmsCmd_カーソルより後をクリア.Size = new System.Drawing.Size(174, 22);
+			this.CmsCmd_カーソルより後をクリア.Size = new System.Drawing.Size(208, 22);
 			this.CmsCmd_カーソルより後をクリア.Text = "カーソルより後をクリア";
 			this.CmsCmd_カーソルより後をクリア.Click += new System.EventHandler(this.CmsCmd_カーソルより後をクリア_Click);
 			// 
 			// CmsCmd_L1
 			// 
 			this.CmsCmd_L1.Name = "CmsCmd_L1";
-			this.CmsCmd_L1.Size = new System.Drawing.Size(171, 6);
+			this.CmsCmd_L1.Size = new System.Drawing.Size(205, 6);
 			// 
 			// CmsCmd_貼り付け
 			// 
 			this.CmsCmd_貼り付け.Name = "CmsCmd_貼り付け";
-			this.CmsCmd_貼り付け.Size = new System.Drawing.Size(174, 22);
+			this.CmsCmd_貼り付け.Size = new System.Drawing.Size(208, 22);
 			this.CmsCmd_貼り付け.Text = "貼り付け";
 			this.CmsCmd_貼り付け.Click += new System.EventHandler(this.CmsCmd_貼り付け_Click);
 			// 
@@ -625,8 +625,6 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.DimGray;
 			this.ClientSize = new System.Drawing.Size(584, 441);
-			this.Controls.Add(this.NumericUpDown1);
-			this.Controls.Add(this.Lbl2);
 			this.Controls.Add(this.Dgv1);
 			this.Controls.Add(this.Dgv2);
 			this.Controls.Add(this.TbResult);
@@ -642,6 +640,8 @@
 			this.Controls.Add(this.BtnCmdStop);
 			this.Controls.Add(this.LblCashOn);
 			this.Controls.Add(this.LblCurTb);
+			this.Controls.Add(this.NumericUpDown1);
+			this.Controls.Add(this.Lbl2);
 			this.Font = new System.Drawing.Font("ＭＳ ゴシック", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.KeyPreview = true;
 			this.MinimumSize = new System.Drawing.Size(600, 480);

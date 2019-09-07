@@ -9,12 +9,12 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-//using System.Threading;
+using System.Threading;
 //using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;// (要)参照に追加
 
-namespace iwm_commandliner
+namespace iwm_commandliner2
 {
 	public partial class Form1 : Form
 	{
@@ -22,31 +22,12 @@ namespace iwm_commandliner
 		// 大域定数
 		//-----------
 		private const string VERSION =
-			"Ver.20190810 'A-4'" + CRLF +
+			"Ver.20190906_2310 'A-29'" + CRLF +
 			"(C)2018-2019 iwm-iwama" + CRLF
 		;
 
 		private const string CRLF = "\r\n";
 		private const string LN = "----------------------------------------------------------------------" + CRLF;
-
-		private const string HELP =
-			"[ESC]  TextBox間をカーソル移動" + CRLF +
-			CRLF +
-			"[F1]  履歴 ON/OFF" + CRLF +
-			"[F2]  編集 ON/OFF" + CRLF +
-			"[F3]  Dir 選択" + CRLF +
-			"[F4]  File 選択" + CRLF +
-			CRLF +
-			"[F5]  コマンドをクリア" + CRLF +
-			"[F6]  結果をクリア" + CRLF +
-			"[F7]  プロセス停止" + CRLF +
-			"[F8]  実行" + CRLF +
-			CRLF +
-			"[F9]  記憶した結果に戻す" + CRLF +
-			"[F10]  結果を記憶" + CRLF +
-			"[F11]  ヘルプ" + CRLF +
-			"[F12]  Window 最大化／最小化" + CRLF
-		;
 
 		//-----------
 		// 大域変数
@@ -54,60 +35,45 @@ namespace iwm_commandliner
 		// CurDir
 		private string CurDir = "";
 
-		// [停止]ボタンが押されたか？
-		private bool BoolStopEvent = false;
-
-		// [Enter] 抑制
-		private bool BoolEnterLock = false;
-
-		// アクティブな textBox の番号
-		private int ActiveTBNum = 0;
-
-		// dataGridView Width/Height
-		private int Dgv1Width = 0;
-		private int Dgv1Height = 0;
-		private int Dgv2Width = 0;
-		private int Dgv2Height = 0;
-
 		// 編集用コマンド
 		private readonly string[,] ACmd = {
-			{ "#",         "ヘルプ" },
 			{ "#grep",     "検索(正規表現)       (例) #grep \"2018\"" },
 			{ "#except",   "不一致検索(正規表現) (例) #except \"2018\"" },
-			{ "#replace",  "置換(正規表現)       (例) #replace \"2018/\" \"18/\"" },
-			{ "#split",    "分割(正規表現)       (例) #split \"\\t\" \"[0],[1]\"" },
-			{ "#sort",     "ソート" },
-			{ "#uniq",     "ソート後、重複行を消去" },
+			{ "#replace",  "置換(正規表現) (例) #replace \"2018/\" \"18/\"" },
+			{ "#split",    "分割(正規表現) (例) #split \"\\t\" \"[0],[1]\"" },
 			{ "#toUpper",  "大文字に変換" },
 			{ "#toLower",  "小文字に変換" },
 			{ "#toWide",   "全角に変換" },
 			{ "#toNarrow", "半角に変換" },
+			{ "#erase",    "消去 \"開始位置\" \"文字数\" (例) #erase \"0\" \"20\"" },
+			{ "#sort",     "ソート" },
+			{ "#uniq",     "ソート後、重複行を消去" },
 			{ "#x1",       "空白行削除" },
 			{ "#x2",       "行番号付与" },
 			{ "#x3",       "行数カウント" },
-			{ "#q",        "終了" }
+			{ "#version",  "バージョン" }
 		};
 
-		// 変数
-		private readonly StringBuilder SB = new StringBuilder();
+		// コマンド／出力結果履歴
+		private readonly List<string> LCmdHistory = new List<string>() { "" };// [0] = ""
+		private int LCmdHistoryPos = 0;
 
-		//---------------
-		// コマンド履歴
-		//---------------
-		private List<string> LCmdHistory = new List<string>();
+		private readonly List<string> LResultHistory = new List<string>() { "" };// [0] = ""
+		private int LResultHistoryPos = 0;
 
-		//-----------
-		// 出力履歴
-		//-----------
-		private string TbResultCache = "";
-		private const int EM_REPLACESEL = 0x00C2;
-
+		// SendMessage関係
 		[DllImport("User32.dll")]
 		private static extern int SendMessage(IntPtr hWnd, int uMsg, int wParam, string lParam);
 
 		private delegate void MyEventHandler(object sender, DataReceivedEventArgs e);
 		private event MyEventHandler MyEvent = null;
-		private Process P = null;
+
+		public Process P1 { get; set; } = null;
+
+		private const int EM_REPLACESEL = 0x00C2;
+
+		// 文字列
+		private readonly StringBuilder SB = new StringBuilder();
 
 		//--------
 		// Form1
@@ -119,156 +85,36 @@ namespace iwm_commandliner
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
+			//
+			SubDgvCmdLoad();
+
+			TbCmd_Enter(sender, e);
+
 			// CurDir表示
 			CurDir = TbCurDir.Text = Directory.GetCurrentDirectory();
 			Directory.SetCurrentDirectory(CurDir);
 
-			// [ESC] [F1] 等を処理
-			KeyPreview = true;
-
 			// 例示
 			TbCmd.Text = "dir";
-			SubTbCmdFocus();
 
-			// 記録バー
-			LblCashOn.Visible = false;
+			//
+			BtnCmdUndo.Enabled = false;
+			BtnCmdRedo.Enabled = false;
 
-			// dataGridView Width/Height
-			Dgv1Width = Dgv1.Width;
-			Dgv1Height = Dgv1.Height;
+			BtnResultUndo.Enabled = false;
+			BtnResultRedo.Enabled = false;
 
-			Dgv2Width = Dgv2.Width;
-			Dgv2Height = Dgv2.Height;
-
-			// Dgv2 表示
+			// DgvEdit 表示
 			for (int _i1 = 0; _i1 < ACmd.GetLength(0); _i1++)
 			{
-				_ = Dgv2.Rows.Add(ACmd[_i1, 0], ACmd[_i1, 1]);
+				_ = DgvEdit.Rows.Add(ACmd[_i1, 0], ACmd[_i1, 1]);
 			}
 
 			// フォントサイズ
 			NumericUpDown1.Value = (int)Math.Round(TbResult.Font.Size);
-		}
 
-		private void Form1_SizeChanged(object sender, EventArgs e)
-		{
-			switch (ActiveTBNum)
-			{
-				case 1:
-					TbResult_MouseClick(sender, null);
-					break;
-
-				case 2:
-					TbCmd_MouseClick(sender, null);
-					break;
-
-				default:
-					break;
-			}
-		}
-
-		private void Form1_KeyUp(object sender, KeyEventArgs e)
-		{
-			///Console.WriteLine("e.KeyCode:" + e.KeyCode);
-			switch (e.KeyCode)
-			{
-				case Keys.Escape:
-					switch (ActiveTBNum)
-					{
-						case 1:
-							ActiveTBNum = 2;
-							break;
-
-						case 2:
-							ActiveTBNum = 1;
-							break;
-
-						default:
-							break;
-					}
-					Form1_SizeChanged(sender, e);
-					break;
-
-				case Keys.F1:
-					if (Dgv1.Focused)
-					{
-						SubTbCmdFocus();
-					}
-					else
-					{
-						_ = Dgv1.Focus();
-					}
-					break;
-
-				case Keys.F2:
-					if (Dgv2.Focused)
-					{
-						SubTbCmdFocus();
-					}
-					else
-					{
-						_ = Dgv2.Focus();
-					}
-					break;
-
-				case Keys.F3:
-					BtnCmdSelectDir_Click(sender, e);
-					break;
-
-				case Keys.F4:
-					BtnCmdSelectFile_Click(sender, e);
-					break;
-
-				case Keys.F5:
-					BtnCmdClear_Click(sender, e);
-					break;
-
-				case Keys.F6:
-					BtnResultClear_Click(sender, e);
-					break;
-
-				case Keys.F7:
-					BtnCmdStop_Click(sender, null);
-					break;
-
-				case Keys.F8:
-					SubTbCmdFocus();
-					BtnCmdExec_Click(sender, null);
-					break;
-
-				case Keys.F9:
-					BtnResultUndo_Click(sender, e);
-					break;
-
-				case Keys.F10:
-					BtnResultCash_Click(sender, e);
-					SendKeys.Send("{TAB}");// 最終コントロール => 一発入れないとフォーカスが不明になる
-					break;
-
-				case Keys.F11:
-					BoolEnterLock = true;
-					_ = MessageBox.Show(VERSION + CRLF + HELP);
-					break;
-
-				case Keys.F12:
-					switch (WindowState)
-					{
-						case FormWindowState.Normal:
-							WindowState = FormWindowState.Maximized;
-							break;
-
-						case FormWindowState.Maximized:
-							WindowState = FormWindowState.Normal;
-							break;
-
-						default:
-							break;
-					}
-					break;
-
-				default:
-					break;
-			}
+			// 初フォーカス
+			SubTbCmdFocus();
 		}
 
 		//-----------
@@ -290,31 +136,33 @@ namespace iwm_commandliner
 				}
 			}
 			TbCurDir.SelectAll();
+		}
 
-			BoolEnterLock = true;
-			SubTbCmdFocus();
+		private void TbCurDir_MouseHover(object sender, EventArgs e)
+		{
+			ToolTip1.SetToolTip(TbCurDir, TbCurDir.Text);
 		}
 
 		//--------
 		// TbCmd
 		//--------
-		private void TbCmd_MouseEnter(object sender, EventArgs e)
+		private void TbCmd_Enter(object sender, EventArgs e)
 		{
-			ToolTip1.SetToolTip(TbCmd, "[↑] 作業フォルダ変更");
-		}
+			CbDgvEdit.Checked = false;
+			CbDgvEdit_Click(sender, e);
 
-		private void TbCmd_MouseClick(object sender, MouseEventArgs e)
-		{
-			_ = TbCmd.Focus();
-			ActiveTBNum = 2;
+			CbDgvCmd.Checked = false;
+			CbDgvCmd_Click(sender, e);
 
-			LblCurTb.Left = -1;
-			LblCurTb.Top = 43;
-		}
+			SubTbCmdFocus();
 
-		private void TbCmd_DragEnter(object sender, DragEventArgs e)
-		{
-			SubTextBoxDragEnterFn(e, TbCmd);
+			try
+			{
+				TbResult.Enabled = true;
+			}
+			catch
+			{
+			}
 		}
 
 		private void TbCmd_KeyUp(object sender, KeyEventArgs e)
@@ -322,27 +170,21 @@ namespace iwm_commandliner
 			// Font固定
 			TbCmd.Font = new Font(TbCmd.Font.Name, TbCmd.Font.Size);
 
-			///Console.WriteLine(e.KeyCode);
 			switch (e.KeyCode)
 			{
 				case Keys.Enter:
-					if (BoolEnterLock)
-					{
-						BoolEnterLock = false;
-					}
-					else
-					{
-						BtnCmdExec_Click(sender, null);
-					}
+					SubBtnCmdExec(sender, null);
 					SubTbCmdFocus();
 					break;
 
 				case Keys.Up:
-					_ = TbCurDir.Focus();
-					TbCurDir_Click(sender, e);
+					BtnCmdUndo_Click(sender, e);
 					break;
 
 				case Keys.Down:
+					BtnCmdRedo_Click(sender, e);
+					break;
+
 				case Keys.Right:
 					if (TbCmd.TextLength == TbCmd.SelectionStart)
 					{
@@ -368,26 +210,51 @@ namespace iwm_commandliner
 			}
 		}
 
-		private void SubTextBoxDragEnterFn(
-			DragEventArgs e,
-			TextBox textbox
-		)
+		private void TbCmd_MouseHover(object sender, EventArgs e)
 		{
-			string[] fileName = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-			textbox.Text = fileName[0];
+			ToolTip1.SetToolTip(TbCmd, TbCmd.Text);
+		}
+
+		private void TbCmd_DragEnter(object sender, DragEventArgs e)
+		{
+			e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
+		}
+
+		private void TbCmd_DragDrop(object sender, DragEventArgs e)
+		{
+			int i1 = TbCmd.SelectionStart;
+			string s1 = "";
+
+			string[] a1 = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+			foreach (string _s1 in a1)
+			{
+				s1 += " " + _s1;
+			}
+
+			TbCmd.Text = TbCmd.Text.Substring(0, i1).Trim() + s1 + " " + TbCmd.Text.Substring(i1).Trim();
 		}
 
 		//---------
 		// CmsCmd
 		//---------
-		private void CmsCmd_カーソルより前をクリア_Click(object sender, EventArgs e)
+		private void CmsCmd_全クリア_Click(object sender, EventArgs e)
 		{
-			SubTextBoxTrimStart(TbCmd);
+			TbCmd.Text = "";
 		}
 
-		private void CmsCmd_カーソルより後をクリア_Click(object sender, EventArgs e)
+		private void CmsCmd_全選択_Click(object sender, EventArgs e)
 		{
-			SubTextBoxTrimEnd(TbCmd);
+			TbCmd.SelectAll();
+		}
+
+		private void CmsCmd_切り取り_Click(object sender, EventArgs e)
+		{
+			TbCmd.Cut();
+		}
+
+		private void CmsCmd_コピー_Click(object sender, EventArgs e)
+		{
+			TbCmd.Copy();
 		}
 
 		private void CmsCmd_貼り付け_Click(object sender, EventArgs e)
@@ -399,75 +266,52 @@ namespace iwm_commandliner
 			}
 		}
 
-		//-------
-		// Dgv1
-		//-------
-		private void Dgv1_Enter(object sender, EventArgs e)
+		//----------
+		// DgvEdit
+		//----------
+		private void CbDgvEdit_Click(object sender, EventArgs e)
 		{
-			Dgv1.Rows.Clear();
-
-			foreach (string _s1 in LCmdHistory)
+			if (CbDgvEdit.Checked == true)
 			{
-				Dgv1.Rows.Add(_s1);
-			}
-
-			SubDgv1Control(true);
-		}
-
-		private void Dgv1_Leave(object sender, EventArgs e)
-		{
-			SubDgv1Control(false);
-		}
-
-		private void SubDgv1Control(
-			bool b
-		)
-		{
-			if (b == true)
-			{
-				Dgv1.ScrollBars = ScrollBars.Both;
-				Dgv1.Height = 358;
-				Dgv1.Width = 165;
-
-				try
-				{
-					Dgv1.CurrentCell = Dgv1[0, Dgv1Row];
-				}
-				catch
-				{
-				}
+				DgvEdit.Enabled = true;
+				DgvEdit.ScrollBars = ScrollBars.Vertical;
+				DgvEdit.Width = 374;
+				DgvEdit.Height = 340;
 			}
 			else
 			{
-				Dgv1.ScrollBars = ScrollBars.None;
-				Dgv1.Height = Dgv1Height;
-				Dgv1.Width = Dgv1Width;
+				DgvEdit.Enabled = false;
+				DgvEdit.ScrollBars = ScrollBars.None;
+				DgvEdit.Width = 68;
+				DgvEdit.Height = 24;
 			}
 		}
 
-		private void Dgv1_CellClick(object sender, DataGridViewCellEventArgs e)
+		private void DgvEdit_MouseHover(object sender, EventArgs e)
 		{
-			try
-			{
-				TbCmd.Text = Dgv1[0, e.RowIndex].Value.ToString();
-			}
-			catch
-			{
-				TbCmd.Text = "";
-			}
+			_ = DgvEdit.Focus();
+		}
+
+		private void DgvEdit_Click(object sender, EventArgs e)
+		{
+			TbCmd.Text = DgvEdit[0, DgvEdit.CurrentRow.Index].Value.ToString();
+			CbDgvEdit.Checked = false;
+			CbDgvEdit_Click(sender, e);
 			SubTbCmdFocus();
 		}
 
-		int Dgv1Row = 0;
+		private int DgvEditRow = 0;
 
-		private void Dgv1_KeyDown(object sender, KeyEventArgs e)
+		private void DgvEdit_KeyDown(object sender, KeyEventArgs e)
 		{
+			DgvEditRow = DgvEdit.CurrentRow.Index;
+
 			switch (e.KeyCode)
 			{
 				case Keys.Enter:
 					try
 					{
-						TbCmd.Text = Dgv1[0, Dgv1.SelectedCells[0].RowIndex].Value.ToString();
+						TbCmd.Text = DgvEdit[0, DgvEditRow].Value.ToString();
 					}
 					catch
 					{
@@ -475,30 +319,14 @@ namespace iwm_commandliner
 					}
 					break;
 
-				case Keys.Up:
-					Dgv1Row -= 1;
-					break;
-
-				case Keys.Down:
-					Dgv1Row += 1;
-					break;
-
-				case Keys.Left:
-					Dgv1Row -= 5;
-					break;
-
-				case Keys.Right:
-					Dgv1Row += 5;
-					break;
-
 				default:
 					break;
 			}
 		}
 
-		private void Dgv1_KeyUp(object sender, KeyEventArgs e)
+		private void DgvEdit_KeyUp(object sender, KeyEventArgs e)
 		{
-			int i1 = Dgv1.RowCount - 1;
+			int i1 = DgvEdit.RowCount - 1;
 
 			switch (e.KeyCode)
 			{
@@ -507,147 +335,120 @@ namespace iwm_commandliner
 					break;
 
 				case Keys.Up:
-					if (Dgv1Row < 0)
+					if (--DgvEditRow < 0)
 					{
-						Dgv1Row = i1;
+						DgvEditRow = i1;
 					}
 					break;
 
 				case Keys.Down:
-					if (Dgv1Row > i1)
+					if (++DgvEditRow > i1)
 					{
-						Dgv1Row = 0;
+						DgvEditRow = 0;
 					}
 					break;
 
 				case Keys.Left:
-					if (Dgv1Row < 0)
+					if (DgvEditRow == 0)
 					{
-						Dgv1Row = 0;
+						DgvEditRow = i1;
+						break;
 					}
+
+					if ((DgvEditRow -= 3) < 0)
+					{
+						DgvEditRow = 0;
+					}
+
 					break;
 
 				case Keys.Right:
-					if (Dgv1Row > i1)
+					if (DgvEditRow == i1)
 					{
-						Dgv1Row = i1;
+						DgvEditRow = 0;
+						break;
 					}
+
+					if ((DgvEditRow += 3) > i1)
+					{
+						DgvEditRow = i1;
+					}
+
 					break;
 
 				case Keys.PageUp:
-					Dgv1Row = 0;
+					DgvEditRow = DgvEditRow == 0 ? i1 : DgvEdit.CurrentRow.Index;
 					break;
 
 				case Keys.PageDown:
-					Dgv1Row = i1;
+					DgvEditRow = DgvEditRow == i1 ? 0 : DgvEdit.CurrentRow.Index;
 					break;
 
 				default:
 					break;
 			}
 
-			try
+			DgvEdit.CurrentCell = DgvEdit[0, DgvEditRow];
+		}
+
+		//---------
+		// DgvCmd
+		//---------
+		private void CbDgvCmd_Click(object sender, EventArgs e)
+		{
+			if (CbDgvCmd.Checked == true)
 			{
-				Dgv1.CurrentCell = Dgv1[0, Dgv1Row];
-			}
-			catch
-			{
-			}
-		}
-
-		private void Dgv1_MouseEnter(object sender, EventArgs e)
-		{
-			Dgv1_Enter(sender, e);
-		}
-
-		private void Dgv1_MouseLeave(object sender, EventArgs e)
-		{
-			Dgv1_Leave(sender, e);
-		}
-
-		//----------------
-		// Dgv2
-		//----------------
-		private void Dgv2_Enter(object sender, EventArgs e)
-		{
-			SubDgv2Control(true);
-		}
-
-		private void Dgv2_Leave(object sender, EventArgs e)
-		{
-			SubDgv2Control(false);
-		}
-
-		private void SubDgv2Control(
-			bool b
-		)
-		{
-			if (b == true)
-			{
-				Dgv2.ScrollBars = ScrollBars.Vertical;
-				Dgv2.Height = 358;
-				Dgv2.Width = 425;
-
-				try
-				{
-					Dgv2.CurrentCell = Dgv2[0, Dgv2Row];
-				}
-				catch
-				{
-				}
+				DgvCmd.Enabled = true;
+				DgvCmd.ScrollBars = ScrollBars.Both;
+				DgvCmd.Width = 291;
+				DgvCmd.Height = 340;
+				TbDgvCmdSearch.Visible = true;
 			}
 			else
 			{
-				Dgv2.ScrollBars = ScrollBars.None;
-				Dgv2.Height = Dgv2Height;
-				Dgv2.Width = Dgv2Width;
+				DgvCmd.Enabled = false;
+				DgvCmd.ScrollBars = ScrollBars.None;
+				DgvCmd.Width = 68;
+				DgvCmd.Height = 24;
+				TbDgvCmdSearch.Visible = false;
 			}
 		}
 
-		private void Dgv2_CellClick(object sender, DataGridViewCellEventArgs e)
+		private void DgvCmd_MouseHover(object sender, EventArgs e)
 		{
-			try
-			{
-				TbCmd.Text = Dgv2[0, e.RowIndex].Value.ToString();
-			}
-			catch
-			{
-				TbCmd.Text = "";
-			}
+			_ = DgvCmd.Focus();
+		}
+
+		private void DgvCmd_Click(object sender, EventArgs e)
+		{
+			TbCmd.Text = DgvCmd[0, DgvCmd.CurrentCell.RowIndex].Value.ToString();
+
+			CbDgvCmd.Checked = false;
+			CbDgvCmd_Click(sender, e);
+
 			SubTbCmdFocus();
 		}
 
-		private int Dgv2Row = 0;
+		private int DgvCmdCurrentRow = 0;
 
-		private void Dgv2_KeyDown(object sender, KeyEventArgs e)
+		private void DgvCmd_KeyDown(object sender, KeyEventArgs e)
 		{
+			DgvCmdCurrentRow = DgvCmd.CurrentRow.Index;
+
 			switch (e.KeyCode)
 			{
 				case Keys.Enter:
+					TbCmd.Text = DgvCmd[0, DgvCmd.CurrentCell.RowIndex].Value.ToString();
+
 					try
 					{
-						TbCmd.Text = Dgv2[0, Dgv2.SelectedCells[0].RowIndex].Value.ToString();
+						DgvCmd.CurrentCell = DgvCmd[0, DgvCmdCurrentRow - 1];
 					}
 					catch
 					{
-						TbCmd.Text = "";
+						DgvCmd.CurrentCell = DgvCmd[0, 0];
 					}
-					break;
 
-				case Keys.Up:
-					Dgv2Row -= 1;
-					break;
-
-				case Keys.Down:
-					Dgv2Row += 1;
-					break;
-
-				case Keys.Left:
-					Dgv2Row -= 5;
-					break;
-
-				case Keys.Right:
-					Dgv2Row += 5;
 					break;
 
 				default:
@@ -655,9 +456,9 @@ namespace iwm_commandliner
 			}
 		}
 
-		private void Dgv2_KeyUp(object sender, KeyEventArgs e)
+		private void DgvCmd_KeyUp(object sender, KeyEventArgs e)
 		{
-			int i1 = Dgv2.RowCount - 1;
+			int i1 = DgvCmd.RowCount - 1;
 
 			switch (e.KeyCode)
 			{
@@ -666,70 +467,144 @@ namespace iwm_commandliner
 					break;
 
 				case Keys.Up:
-					if (Dgv2Row < 0)
+					if (--DgvCmdCurrentRow < 0)
 					{
-						Dgv2Row = i1;
+						DgvCmdCurrentRow = i1;
 					}
 					break;
 
 				case Keys.Down:
-					if (Dgv2Row > i1)
+					if (++DgvCmdCurrentRow > i1)
 					{
-						Dgv2Row = 0;
+						DgvCmdCurrentRow = 0;
 					}
 					break;
 
 				case Keys.Left:
-					if (Dgv2Row < 0)
-					{
-						Dgv2Row = 0;
-					}
+					DgvCmdCurrentRow = DgvCmdCurrentRow == 0 ? i1 : 0;
 					break;
 
 				case Keys.Right:
-					if (Dgv2Row > i1)
-					{
-						Dgv2Row = i1;
-					}
+					DgvCmdCurrentRow = DgvCmdCurrentRow == i1 ? 0 : i1;
 					break;
 
 				case Keys.PageUp:
-					Dgv2Row = 0;
+					DgvCmdCurrentRow = DgvCmdCurrentRow == 0 ? i1 : DgvCmd.CurrentRow.Index;
 					break;
 
 				case Keys.PageDown:
-					Dgv2Row = i1;
+					DgvCmdCurrentRow = DgvCmdCurrentRow == i1 ? 0 : DgvCmd.CurrentRow.Index;
+					break;
+
+				case Keys.Tab:
+					_ = TbDgvCmdSearch.Focus();
 					break;
 
 				default:
 					break;
 			}
 
-			Dgv2.CurrentCell = Dgv2[0, Dgv2Row];
+			DgvCmd.CurrentCell = DgvCmd[0, DgvCmdCurrentRow];
 		}
 
-		private void Dgv2_MouseEnter(object sender, EventArgs e)
+		IEnumerable<string> IeFile = null;
+
+		private void SubDgvCmdLoad()
 		{
-			Dgv2_Enter(sender, e);
+			List<string> l1 = new List<string>();
+
+			foreach (string _s1 in Environment.GetEnvironmentVariable("Path").ToLower().Replace("/", "\\").Split(';'))
+			{
+				string _s2 = _s1.TrimEnd('\\');
+				if (_s2.Length > 0)
+				{
+					l1.Add(_s2);
+				}
+			}
+
+			l1.Sort();
+			IEnumerable<string> ie1 = l1.Distinct(StringComparer.InvariantCultureIgnoreCase);
+
+			List<string> l2 = new List<string>();
+
+			foreach (string _s1 in ie1)
+			{
+				DirectoryInfo DI = new DirectoryInfo(_s1);
+
+				if (DI.Exists)
+				{
+					foreach (FileInfo _fi1 in DI.GetFiles("*", SearchOption.TopDirectoryOnly))
+					{
+						if (Regex.IsMatch(_fi1.FullName, @"\.(exe|bat|cmd)$", RegexOptions.IgnoreCase))
+						{
+							l2.Add(Path.GetFileName(_fi1.FullName));
+						}
+					}
+				}
+			}
+
+			l2.Sort();
+			IeFile = l2.Distinct(StringComparer.InvariantCultureIgnoreCase);
+
+			foreach (string _s1 in IeFile)
+			{
+				_ = DgvCmd.Rows.Add(_s1);
+			}
 		}
 
-		private void Dgv2_MouseLeave(object sender, EventArgs e)
+		private void TbDgvCmdSearch_MouseHover(object sender, EventArgs e)
 		{
-			Dgv2_Leave(sender, e);
+			_ = TbDgvCmdSearch.Focus();
+		}
+
+		private void TbDgvCmdSearch_Enter(object sender, EventArgs e)
+		{
+			TbDgvCmdSearch.BackColor = Color.WhiteSmoke;
+		}
+
+		private void TbDgvCmdSearch_Leave(object sender, EventArgs e)
+		{
+			TbDgvCmdSearch.BackColor = Color.LightGray;
+		}
+
+		private void TbDgvCmdSearch_KeyUp(object sender, KeyEventArgs e)
+		{
+			switch (e.KeyCode)
+			{
+				case Keys.Up:
+				case Keys.Down:
+					_ = DgvCmd.Focus();
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		private void TbDgvCmdSearch_TextChanged(object sender, EventArgs e)
+		{
+			DgvCmd.Rows.Clear();
+
+			try
+			{
+				foreach (string _s1 in IeFile)
+				{
+					if (Regex.IsMatch(_s1, TbDgvCmdSearch.Text, RegexOptions.IgnoreCase))
+					{
+						_ = DgvCmd.Rows.Add(_s1);
+					}
+				}
+			}
+			catch
+			{
+			}
+
+			Thread.Sleep(250);
 		}
 
 		//-----------
 		// TbResult
 		//-----------
-		private void TbResult_MouseClick(object sender, MouseEventArgs e)
-		{
-			_ = TbResult.Focus();
-			ActiveTBNum = 1;
-
-			LblCurTb.Left = -1;
-			LblCurTb.Top = TbResult.Location.Y - 15 + (TbResult.Size.Height / 2);
-		}
-
 		private void TbResult_KeyUp(object sender, KeyEventArgs e)
 		{
 			switch (e.KeyCode)
@@ -747,94 +622,80 @@ namespace iwm_commandliner
 			}
 		}
 
-		private void TbResult_DragDrop(object sender, DragEventArgs e)
+		//-------------
+		// Undo／Redo
+		//-------------
+		private void BtnCmdUndo_Click(object sender, EventArgs e)
 		{
-			string[] fileName = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-
-			_ = SB.Clear();
-			foreach (string _s1 in File.ReadLines(fileName[0], Encoding.GetEncoding("Shift_JIS")))
+			if (LCmdHistoryPos > 0)
 			{
-				_ = SB.Append(_s1.TrimEnd() + CRLF);
+				--LCmdHistoryPos;
+				TbCmd.Text = LCmdHistory[LCmdHistoryPos];
+				BtnCmdRedo.Enabled = true;
 			}
-			_ = SendMessage(TbResult.Handle, EM_REPLACESEL, 1, SB.ToString());
 
-			SubTbResultFocus();
-			TbResult_MouseClick(sender, null);
+			if (LCmdHistoryPos == 0)
+			{
+				BtnCmdUndo.Enabled = false;
+			}
+
+			SubTbCmdFocus();
 		}
 
-		private void TbResult_DragEnter(object sender, DragEventArgs e)
+		private void BtnCmdRedo_Click(object sender, EventArgs e)
 		{
-			e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
+			if (LCmdHistoryPos < LCmdHistory.Count - 1)
+			{
+				++LCmdHistoryPos;
+				TbCmd.Text = LCmdHistory[LCmdHistoryPos];
+				BtnCmdUndo.Enabled = true;
+			}
+
+			if (LCmdHistoryPos == LCmdHistory.Count - 1)
+			{
+				BtnCmdRedo.Enabled = false;
+			}
+
+			SubTbCmdFocus();
 		}
 
-		//----------
-		// Dir選択
-		//----------
-		private void BtnCmdSelectDir_Click(object sender, EventArgs e)
+		//-------
+		// 停止
+		//-------
+		private void BtnCmdStop_Click(object sender, EventArgs e)
 		{
-			_ = BtnCmdSelectDir.Focus();
+			SubKillProcessTree(P1);
+			TbCmd_Enter(sender, e);
+		}
 
-			using (FolderBrowserDialog fbd = new FolderBrowserDialog
+		private void SubKillProcessTree(
+			Process p
+		)
+		{
+			string taskkill = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "taskkill.exe");
+			using (Process _p1 = new Process())
 			{
-				Description = "フォルダを指定してください。",
-				SelectedPath = Environment.CurrentDirectory,
-				ShowNewFolderButton = true
-			})
-			{
-				if (fbd.ShowDialog(this) == DialogResult.OK)
+				try
 				{
-					string s1 = TbCmd.Text;
-					string s2 = fbd.SelectedPath;
-					int i1 = TbCmd.SelectionStart;
-
-					TbCmd.Text = s1.Substring(0, i1) + " " + s2 + s1.Substring(i1);
-
-					TbCmd.Select(TbCmd.TextLength, 0);
-					_ = TbCmd.Focus();
+					_p1.StartInfo.FileName = taskkill;
+					_p1.StartInfo.Arguments = string.Format("/PID {0} /T /F", p.Id);
+					_p1.StartInfo.CreateNoWindow = true;
+					_p1.StartInfo.UseShellExecute = false;
+					_ = _p1.Start();
+					_ = _p1.WaitForExit(2500);
+					_p1.Close();
+					_p1.Dispose();
+				}
+				catch
+				{
 				}
 			}
-			BoolEnterLock = true;
 		}
 
-		//-----------
-		// File選択
-		//-----------
-		private void BtnCmdSelectFile_Click(object sender, EventArgs e)
-		{
-			_ = BtnCmdSelectFile.Focus();
-
-			using (OpenFileDialog openFileDialog1 = new OpenFileDialog
-			{
-				InitialDirectory = Environment.CurrentDirectory,
-				Filter = "All files (*.*)|*.*",
-				FilterIndex = 1,
-				RestoreDirectory = true
-			})
-			{
-				if (openFileDialog1.ShowDialog() == DialogResult.OK)
-				{
-					string s1 = TbCmd.Text;
-					string s2 = openFileDialog1.FileName.Replace(Directory.GetCurrentDirectory() + "\\", "");
-					int i1 = TbCmd.SelectionStart;
-
-					TbCmd.Text = s1.Substring(0, i1) + " " + s2 + s1.Substring(i1);
-
-					TbCmd.Select(TbCmd.TextLength, 0);
-					_ = TbCmd.Focus();
-				}
-			}
-			BoolEnterLock = true;
-		}
-
-		//---------
-		// クリア
-		//---------
-		private void BtnCmdClear_Click(object sender, EventArgs e)
-		{
-			TbCmd.Text = "";
-		}
-
-		private void BtnCmdExec_Click(object sender, EventArgs e)
+		//-------
+		// 実行
+		//-------
+		private void SubBtnCmdExec(object sender, EventArgs e)
 		{
 			TbCmd.Text = TbCmd.Text.Replace(CRLF, "").Trim();
 
@@ -845,8 +706,29 @@ namespace iwm_commandliner
 			}
 
 			// 履歴を追加
-			LCmdHistory.Add(TbCmd.Text);
-			LCmdHistory = RtnListUniqSort(LCmdHistory);
+			if (TbCmd.Text.Length > 0 && TbCmd.Text != LCmdHistory[LCmdHistory.Count - 1])
+			{
+				LCmdHistory.Add(TbCmd.Text);
+				LCmdHistoryPos = LCmdHistory.Count - 1;
+
+				BtnCmdUndo.Enabled = true;
+				BtnCmdRedo.Enabled = false;
+			}
+
+			if (TbResult.Text.Length > 0 && TbResult.Text != LResultHistory[LResultHistory.Count - 1])
+			{
+				BoolResultAdd = true;
+
+				LResultHistory.Add(TbResult.Text);
+				LResultHistoryPos = LResultHistory.Count;
+
+				BtnResultUndo.Enabled = true;
+				BtnResultRedo.Enabled = false;
+			}
+			else
+			{
+				BoolResultAdd = false;
+			}
 
 			if (TbCmd.Text[0] == '#')
 			{
@@ -880,12 +762,6 @@ namespace iwm_commandliner
 				// 大小区別しない
 				switch (aOp[0].ToLower())
 				{
-					// ヘルプ
-					case "#":
-						BoolEnterLock = true;
-						_ = MessageBox.Show(VERSION + CRLF + HELP);
-						break;
-
 					// 検索（一致）
 					case "#grep":
 						SubTextBoxGrep(TbResult, aOp[1], true);
@@ -928,6 +804,11 @@ namespace iwm_commandliner
 					case "#tolower":
 						TbResult.Text = TbResult.Text.ToLower();
 						SubTbResultFocus();
+						break;
+
+					// 消去
+					case "#erase":
+						SubTextBoxEraseInLine(TbResult, aOp[1], aOp[2]);
 						break;
 
 					// ソート
@@ -995,9 +876,9 @@ namespace iwm_commandliner
 						_ = SendMessage(TbResult.Handle, EM_REPLACESEL, 1, string.Format("{3}{2}全行数　 : {0}{3}有効行数 : {1}{3}{2}", cntAll, cntActive, LN, CRLF));
 						break;
 
-					// 終了
-					case "#q":
-						Application.Exit();
+					// バージョン
+					case "#version":
+						TbResult.Text = LN + VERSION + LN;
 						break;
 
 					default:
@@ -1007,18 +888,18 @@ namespace iwm_commandliner
 			else
 			{
 				MyEvent = new MyEventHandler(EventDataReceived);
-				P = new Process();
-				P.StartInfo.FileName = "cmd.exe";
-				P.StartInfo.Arguments = "/C " + TbCmd.Text;
-				P.StartInfo.UseShellExecute = false;
-				P.StartInfo.RedirectStandardOutput = true;
-				P.StartInfo.CreateNoWindow = true;
-				P.OutputDataReceived += new DataReceivedEventHandler(ProcessDataReceived);
-				_ = P.Start();
-				P.BeginOutputReadLine();
+				P1 = new Process();
+				P1.StartInfo.FileName = "cmd.exe";
+				P1.StartInfo.Arguments = "/C " + TbCmd.Text;
+				P1.StartInfo.UseShellExecute = false;
+				P1.StartInfo.RedirectStandardOutput = true;
+				P1.StartInfo.CreateNoWindow = true;
+				P1.OutputDataReceived += new DataReceivedEventHandler(ProcessDataReceived);
+				_ = P1.Start();
+				P1.BeginOutputReadLine();
 				// 不可 P.Close() => 終了コードを返さないので書くな!!
 
-				SubTbResultFocus();
+				TbResult.Enabled = false;
 			}
 
 			SubTbCmdFocus();
@@ -1034,54 +915,28 @@ namespace iwm_commandliner
 			_ = Invoke(MyEvent, new object[2] { sender, e });
 		}
 
-		private void BtnCmdStop_Click(object sender, EventArgs e)
-		{
-			SubTbCmdFocus();
-
-			BoolStopEvent = true;
-
-			try
-			{
-				// 不可 P.Kill() => 子プロセスは SubKillProcessTree() で削除する
-				SubKillProcessTree(P);
-				P.Close();
-				P.Dispose();
-			}
-			catch
-			{
-			}
-		}
-
 		//------------
 		// CmsResult
 		//------------
 		private void CmsResult_上へ_Click(object sender, EventArgs e)
 		{
 			TbResult.SelectionStart = 0;
-			_ = TbResult.Focus();
 			TbResult.ScrollToCaret();
 		}
 
 		private void CmsResult_下へ_Click(object sender, EventArgs e)
 		{
 			TbResult.SelectionStart = TbResult.TextLength;
-			_ = TbResult.Focus();
 			TbResult.ScrollToCaret();
 		}
 
-		private void CmsResult_カーソルより前をクリア_Click(object sender, EventArgs e)
+		private void CmsResult_全クリア_Click(object sender, EventArgs e)
 		{
-			SubTextBoxTrimStart(TbResult);
-		}
-
-		private void CmsResult_カーソルより後をクリア_Click(object sender, EventArgs e)
-		{
-			SubTextBoxTrimEnd(TbResult);
+			TbResult.Text = "";
 		}
 
 		private void CmsResult_全選択_Click(object sender, EventArgs e)
 		{
-			_ = TbResult.Focus();
 			TbResult.SelectAll();
 		}
 
@@ -1119,74 +974,80 @@ namespace iwm_commandliner
 			SubTextBoxToSaveFile(TbResult, CmsResult_名前を付けて保存_UTF8N.Text);
 		}
 
+		//-------------
+		// Undo／Redo
+		//-------------
+		private bool BoolResultAdd = false;
+
+		private void BtnResultUndo_Click(object sender, EventArgs e)
+		{
+			if (BoolResultAdd == true && TbResult.Text.Length > 0 && TbResult.Text != LResultHistory[LResultHistory.Count - 1])
+			{
+				LResultHistory.Add(TbResult.Text);
+				LResultHistoryPos = LResultHistory.Count - 1;
+				BoolResultAdd = false;
+			}
+
+			--LResultHistoryPos;
+
+			if (LResultHistoryPos >= 0)
+			{
+				TbResult.Text = LResultHistory[LResultHistoryPos];
+				BtnResultRedo.Enabled = true;
+			}
+
+			if (LResultHistoryPos <= 0)
+			{
+				LResultHistoryPos = 0;
+				BtnResultUndo.Enabled = false;
+			}
+
+			SubTbCmdFocus();
+		}
+
+		private void BtnResultRedo_Click(object sender, EventArgs e)
+		{
+			++LResultHistoryPos;
+
+			if (LResultHistoryPos < LResultHistory.Count)
+			{
+				TbResult.Text = LResultHistory[LResultHistoryPos];
+				BtnResultUndo.Enabled = true;
+			}
+
+			if (LResultHistoryPos >= LResultHistory.Count - 1)
+			{
+				LResultHistoryPos = LResultHistory.Count - 1;
+				BtnResultRedo.Enabled = false;
+			}
+
+			SubTbCmdFocus();
+		}
+
 		//-----------------
 		// フォントサイズ
 		//-----------------
 		private void NumericUpDown1_ValueChanged(object sender, EventArgs e)
 		{
+			if (NumericUpDown1.Value < NumericUpDown1.Minimum)
+			{
+				NumericUpDown1.Value = NumericUpDown1.Minimum;
+			}
+
+			if (NumericUpDown1.Value > NumericUpDown1.Maximum)
+			{
+				NumericUpDown1.Value = NumericUpDown1.Maximum;
+			}
+
 			TbResult.Font = new Font(TbResult.Font.Name.ToString(), (float)NumericUpDown1.Value);
 		}
 
-		//---------
-		// クリア
-		//---------
-		private void BtnResultClear_Click(object sender, EventArgs e)
+		//----------------
+		//	読取専用解除
+		//----------------
+		private void BtnTbResultWrite_Click(object sender, EventArgs e)
 		{
-			TbResult.Text = "";
-		}
-
-		//-------------
-		// 記憶／戻す
-		//-------------
-		private void BtnResultUndo_Click(object sender, EventArgs e)
-		{
-			TbResult.Text = TbResultCache;
-		}
-
-		private void BtnResultUndo_MouseEnter(object sender, EventArgs e)
-		{
-			SubBtnResultToolTip(BtnResultUndo);
-		}
-
-		private void BtnResultCash_Click(object sender, EventArgs e)
-		{
-			TbResultCache = TbResult.Text;
-			LblCashOn.Visible = TbResultCache.Length > 0 ? true : false;
-		}
-
-		private void BtnResultCash_MouseEnter(object sender, EventArgs e)
-		{
-			SubBtnResultToolTip(BtnResultCash);
-		}
-
-		private void SubBtnResultToolTip(Button btn)
-		{
-			const int LENMAX = 500;
-			int len = TbResultCache.Length;
-			if (len > LENMAX)
-			{
-				len = LENMAX;
-			}
-			ToolTip1.SetToolTip(btn, TbResultCache.Substring(0, len));
-		}
-
-		//---------------------------
-		// 子・孫プロセスを終了する
-		//---------------------------
-		private void SubKillProcessTree(
-			Process p
-		)
-		{
-			string taskkill = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "taskkill.exe");
-			using (Process pKiller = new Process())
-			{
-				pKiller.StartInfo.FileName = taskkill;
-				pKiller.StartInfo.Arguments = string.Format("/PID {0} /T /F", p.Id);
-				pKiller.StartInfo.CreateNoWindow = true;
-				pKiller.StartInfo.UseShellExecute = false;
-				_ = pKiller.Start();
-				pKiller.WaitForExit();
-			}
+			TbCmd_Enter(sender, e);
 		}
 
 		//-----------------------
@@ -1199,8 +1060,7 @@ namespace iwm_commandliner
 
 			// カーソル位置を末尾へ移動
 			TbCmd.Select(TbCmd.TextLength, 0);
-
-			TbCmd_MouseClick(null, null);
+			_ = TbCmd.Focus();
 		}
 
 		// TbResult
@@ -1213,32 +1073,10 @@ namespace iwm_commandliner
 		//-----------------------
 		// contextMenuStrip操作
 		//-----------------------
-		// カーソル位置より前を削除
-		private void SubTextBoxTrimStart(
-			TextBox tb
-		)
-		{
-			int iEnd = tb.SelectionStart;
-			tb.Select(0, iEnd);
-			tb.SelectedText = "";
-		}
-
-		// カーソル位置より後を削除
-		private void SubTextBoxTrimEnd(
-			TextBox tb
-		)
-		{
-			int iBgn = tb.SelectionStart;
-			tb.AppendText(" ");
-			int iEnd = tb.SelectionStart;
-			tb.Select(iBgn, iEnd);
-			tb.SelectedText = "";
-		}
-
 		// ファイル保存
 		private void SubTextBoxToSaveFile(
 			TextBox tb,
-			String code
+			string code
 		)
 		{
 			using (SaveFileDialog saveFileDialog1 = new SaveFileDialog
@@ -1281,6 +1119,7 @@ namespace iwm_commandliner
 			}
 
 			Regex rgx;
+
 			try
 			{
 				rgx = new Regex("(?i)" + sRegex, RegexOptions.Compiled);
@@ -1291,21 +1130,11 @@ namespace iwm_commandliner
 			}
 
 			string s1 = tb.Text;
-			BoolStopEvent = false;
 
 			_ = SB.Clear();
+
 			foreach (string _s1 in s1.Split('\n'))
 			{
-				// 割込処理実行
-				// [停止]ボタンが押されたか？
-				Application.DoEvents();
-
-				if (BoolStopEvent)
-				{
-					BoolStopEvent = false;
-					break;
-				}
-
 				if (bMatch == rgx.IsMatch(_s1))
 				{
 					_ = SB.Append(_s1 + CRLF);
@@ -1338,6 +1167,7 @@ namespace iwm_commandliner
 			sNew = sNew.Replace("\\\'", "\'");
 
 			Regex rgx;
+
 			try
 			{
 				rgx = new Regex("(?i)" + sOld, RegexOptions.Compiled);
@@ -1347,20 +1177,10 @@ namespace iwm_commandliner
 				return;
 			}
 
-			BoolStopEvent = false;
-
 			_ = SB.Clear();
+
 			foreach (string _s1 in tb.Text.Split('\n'))
 			{
-				// 割込処理実行
-				// [停止]ボタンが押されたか？
-				Application.DoEvents();
-
-				if (BoolStopEvent == true)
-				{
-					BoolStopEvent = false;
-					break;
-				}
 				_ = SB.Append(rgx.Replace(_s1.Trim(), sNew) + CRLF);
 			}
 
@@ -1383,6 +1203,7 @@ namespace iwm_commandliner
 			}
 
 			Regex rgx1, rgx2;
+
 			try
 			{
 				rgx1 = new Regex(@"\[\d+\]", RegexOptions.Compiled);
@@ -1394,21 +1215,11 @@ namespace iwm_commandliner
 			}
 
 			string s1 = tb.Text;
-			BoolStopEvent = false;
 
 			_ = SB.Clear();
+
 			foreach (string _s1 in s1.Split('\n'))
 			{
-				// 割込処理実行
-				// [停止]ボタンが押されたか？
-				Application.DoEvents();
-
-				if (BoolStopEvent == true)
-				{
-					BoolStopEvent = false;
-					break;
-				}
-
 				string[] a1 = rgx2.Split(_s1.Trim());
 
 				if (a1[0].Length > 0)
@@ -1417,11 +1228,94 @@ namespace iwm_commandliner
 					for (int _i1 = 0; _i1 < a1.Length; _i1++)
 					{
 						_s2 = _s2.Replace("[" + _i1.ToString() + "]", a1[_i1]);
+
+						// 特殊文字を置換
+						_s2 = _s2.Replace("\\n", CRLF);
+						_s2 = _s2.Replace("\\t", "\t");
+						_s2 = _s2.Replace("\\\\", "\\");
+						_s2 = _s2.Replace("\\\"", "\"");
+						_s2 = _s2.Replace("\\\'", "\'");
 					}
 
 					// 該当なしの変換子を削除
 					_ = SB.Append(rgx1.Replace(_s2, "") + CRLF);
 				}
+			}
+
+			tb.Text = SB.ToString();
+			tb.Select(tb.TextLength, 0);
+		}
+
+		//-----------
+		// 文字消去
+		//-----------
+		private void SubTextBoxEraseInLine(
+			TextBox tb,
+			string sStartIndex,
+			string sLength
+		)
+		{
+			int iStart;
+			try
+			{
+				iStart = int.Parse(sStartIndex);
+
+				if (iStart < 0)
+				{
+					iStart = 0;
+				}
+			}
+			catch
+			{
+				iStart = 0;
+			}
+
+			_ = SB.Clear();
+
+			foreach (string _s1 in tb.Text.Split('\n'))
+			{
+				string _s2 = _s1.TrimEnd();
+
+				if (_s2.Length > 0 && _s2.Length >= iStart)
+				{
+					if (iStart > 0)
+					{
+						_ = SB.Append(_s2.Substring(0, iStart));
+					}
+
+					int iLen;
+					try
+					{
+						iLen = int.Parse(sLength);
+
+						if (iLen < 0)
+						{
+							iLen = 0;
+						}
+					}
+					catch
+					{
+						iLen = _s2.Length;
+					}
+
+					if (iStart + iLen >= _s2.Length)
+					{
+						iLen = _s2.Length - iStart;
+					}
+
+					for (int _i1 = 0; _i1 < iLen; _i1++)
+					{
+						_ = SB.Append(" ");
+					}
+
+					_ = SB.Append(_s1.Substring(iStart + iLen));
+				}
+				else
+				{
+					_ = SB.Append(_s2);
+				}
+
+				_ = SB.Append(CRLF);
 			}
 
 			tb.Text = SB.ToString();
@@ -1454,6 +1348,7 @@ namespace iwm_commandliner
 			}
 
 			_ = SB.Clear();
+
 			foreach (string _s1 in l1)
 			{
 				_ = SB.Append(_s1 + CRLF);

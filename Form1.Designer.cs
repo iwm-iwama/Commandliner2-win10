@@ -263,13 +263,14 @@
 			this.TbCmd.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.TbCmd.ContextMenuStrip = this.CmsCmd;
 			this.TbCmd.Font = new System.Drawing.Font("ＭＳ ゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-			this.TbCmd.Location = new System.Drawing.Point(10, 25);
+			this.TbCmd.Location = new System.Drawing.Point(11, 26);
 			this.TbCmd.Margin = new System.Windows.Forms.Padding(0);
 			this.TbCmd.Multiline = true;
 			this.TbCmd.Name = "TbCmd";
-			this.TbCmd.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+			this.TbCmd.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
 			this.TbCmd.Size = new System.Drawing.Size(445, 50);
 			this.TbCmd.TabIndex = 1;
+			this.TbCmd.WordWrap = false;
 			this.TbCmd.DragDrop += new System.Windows.Forms.DragEventHandler(this.TbCmd_DragDrop);
 			this.TbCmd.DragEnter += new System.Windows.Forms.DragEventHandler(this.TbCmd_DragEnter);
 			this.TbCmd.Enter += new System.EventHandler(this.TbCmd_Enter);

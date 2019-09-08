@@ -22,7 +22,7 @@ namespace iwm_commandliner2
 		// 大域定数
 		//-----------
 		private const string VERSION =
-			"Ver.20190906_2310 'A-29'" + CRLF +
+			"Ver.20190908_1640 'A-29'" + CRLF +
 			"(C)2018-2019 iwm-iwama" + CRLF
 		;
 
@@ -170,6 +170,9 @@ namespace iwm_commandliner2
 			// Font固定
 			TbCmd.Font = new Font(TbCmd.Font.Name, TbCmd.Font.Size);
 
+			int iLen = TbCmd.TextLength;
+			int i1;
+
 			switch (e.KeyCode)
 			{
 				case Keys.Enter:
@@ -178,24 +181,44 @@ namespace iwm_commandliner2
 					break;
 
 				case Keys.Up:
-					BtnCmdUndo_Click(sender, e);
+					TbCmd.Select(0, 0);
 					break;
 
 				case Keys.Down:
-					BtnCmdRedo_Click(sender, e);
+					TbCmd.Select(iLen, 0);
 					break;
 
 				case Keys.Right:
-					if (TbCmd.TextLength == TbCmd.SelectionStart)
+					if (iLen == TbCmd.SelectionStart)
 					{
 						TbCmd.Text += " ";
-						TbCmd.Select(TbCmd.TextLength, 0);
+						TbCmd.Select(TbCmd.TextLength - 1, 1);
 					}
+					break;
+
+				case Keys.PageUp:
+					i1 = TbCmd.SelectionStart - 10;
+					if (i1 < 0)
+					{
+						i1 = 0;
+					}
+					TbCmd.Select(i1, 0);
+					break;
+
+				case Keys.PageDown:
+					i1 = TbCmd.SelectionStart + 10;
+					if (i1 > iLen)
+					{
+						i1 = iLen;
+					}
+					TbCmd.Select(i1, 0);
 					break;
 
 				default:
 					break;
 			}
+
+			TbCmd.ScrollToCaret();
 
 			// 補完
 			if ((e.KeyCode == Keys.Down || e.KeyCode == Keys.Right || e.KeyCode == Keys.Space) && TbCmd.TextLength == TbCmd.SelectionStart && Regex.IsMatch(TbCmd.Text, @"^\s*#"))

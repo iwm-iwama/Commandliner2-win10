@@ -22,7 +22,7 @@ namespace iwm_commandliner2
 		// 大域定数
 		//-----------
 		private const string VERSION =
-			"Ver.20190908_1640 'A-29'" + CRLF +
+			"Ver.20190908_2010 'A-29'" + CRLF +
 			"(C)2018-2019 iwm-iwama" + CRLF
 		;
 
@@ -37,10 +37,10 @@ namespace iwm_commandliner2
 
 		// 編集用コマンド
 		private readonly string[,] ACmd = {
-			{ "#grep",     "検索(正規表現)       (例) #grep \"2018\"" },
-			{ "#except",   "不一致検索(正規表現) (例) #except \"2018\"" },
-			{ "#replace",  "置換(正規表現) (例) #replace \"2018/\" \"18/\"" },
-			{ "#split",    "分割(正規表現) (例) #split \"\\t\" \"[0],[1]\"" },
+			{ "#grep",     "検索       (例) #grep \"2018\"" },
+			{ "#except",   "不一致検索 (例) #except \"2018\"" },
+			{ "#replace",  "置換       (例) #replace \"2018/\" \"18/\"" },
+			{ "#split",    "分割       (例) #split \"\\t\" \"[0],[1]\"" },
 			{ "#toUpper",  "大文字に変換" },
 			{ "#toLower",  "小文字に変換" },
 			{ "#toWide",   "全角に変換" },
@@ -192,7 +192,8 @@ namespace iwm_commandliner2
 					if (iLen == TbCmd.SelectionStart)
 					{
 						TbCmd.Text += " ";
-						TbCmd.Select(TbCmd.TextLength - 1, 1);
+						TbCmd.Select(TbCmd.TextLength, 0);
+						// 後段で補完
 					}
 					break;
 
@@ -235,7 +236,7 @@ namespace iwm_commandliner2
 
 		private void TbCmd_MouseHover(object sender, EventArgs e)
 		{
-			ToolTip1.SetToolTip(TbCmd, TbCmd.Text);
+			ToolTip1.SetToolTip(TbCmd, Regex.Replace(TbCmd.Text, @"(?<=\G.{80})(?!$)", Environment.NewLine));
 		}
 
 		private void TbCmd_DragEnter(object sender, DragEventArgs e)

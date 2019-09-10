@@ -71,6 +71,7 @@
 			this.CbDgvCmd = new System.Windows.Forms.CheckBox();
 			this.BtnResultRedo = new System.Windows.Forms.Button();
 			this.BtnResultUndo = new System.Windows.Forms.Button();
+			this.LblResult = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.DgvEdit)).BeginInit();
 			this.CmsResult.SuspendLayout();
 			this.CmsCmd.SuspendLayout();
@@ -263,7 +264,7 @@
 			this.TbCmd.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.TbCmd.ContextMenuStrip = this.CmsCmd;
 			this.TbCmd.Font = new System.Drawing.Font("ＭＳ ゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-			this.TbCmd.Location = new System.Drawing.Point(11, 26);
+			this.TbCmd.Location = new System.Drawing.Point(11, 25);
 			this.TbCmd.Margin = new System.Windows.Forms.Padding(0);
 			this.TbCmd.Multiline = true;
 			this.TbCmd.Name = "TbCmd";
@@ -339,12 +340,13 @@
 			this.TbCurDir.Cursor = System.Windows.Forms.Cursors.Default;
 			this.TbCurDir.Font = new System.Drawing.Font("ＭＳ Ｐゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.TbCurDir.ForeColor = System.Drawing.Color.Snow;
-			this.TbCurDir.Location = new System.Drawing.Point(10, 6);
+			this.TbCurDir.Location = new System.Drawing.Point(12, 8);
 			this.TbCurDir.Margin = new System.Windows.Forms.Padding(0);
 			this.TbCurDir.Name = "TbCurDir";
-			this.TbCurDir.Size = new System.Drawing.Size(445, 13);
+			this.TbCurDir.Size = new System.Drawing.Size(443, 13);
 			this.TbCurDir.TabIndex = 0;
 			this.TbCurDir.TabStop = false;
+			this.TbCurDir.Text = "TbCurDir";
 			this.TbCurDir.WordWrap = false;
 			this.TbCurDir.Click += new System.EventHandler(this.TbCurDir_Click);
 			this.TbCurDir.MouseHover += new System.EventHandler(this.TbCurDir_MouseHover);
@@ -374,7 +376,7 @@
 			this.BtnTbResultWrite.Margin = new System.Windows.Forms.Padding(0);
 			this.BtnTbResultWrite.Name = "BtnTbResultWrite";
 			this.BtnTbResultWrite.Size = new System.Drawing.Size(22, 22);
-			this.BtnTbResultWrite.TabIndex = 14;
+			this.BtnTbResultWrite.TabIndex = 15;
 			this.BtnTbResultWrite.TabStop = false;
 			this.BtnTbResultWrite.Text = "★";
 			this.ToolTip1.SetToolTip(this.BtnTbResultWrite, "画面ロック解除");
@@ -404,7 +406,7 @@
             0});
 			this.NumericUpDown1.Name = "NumericUpDown1";
 			this.NumericUpDown1.Size = new System.Drawing.Size(45, 20);
-			this.NumericUpDown1.TabIndex = 12;
+			this.NumericUpDown1.TabIndex = 13;
 			this.NumericUpDown1.TabStop = false;
 			this.NumericUpDown1.Value = new decimal(new int[] {
             10,
@@ -424,7 +426,7 @@
 			this.Lbl2.Margin = new System.Windows.Forms.Padding(0);
 			this.Lbl2.Name = "Lbl2";
 			this.Lbl2.Size = new System.Drawing.Size(20, 15);
-			this.Lbl2.TabIndex = 13;
+			this.Lbl2.TabIndex = 14;
 			this.Lbl2.Text = "pt";
 			this.Lbl2.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
 			// 
@@ -536,6 +538,7 @@
 			this.TbResult.TabStop = false;
 			this.TbResult.WordWrap = false;
 			this.TbResult.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TbResult_KeyUp);
+			this.TbResult.MouseUp += new System.Windows.Forms.MouseEventHandler(this.TbResult_MouseUp);
 			// 
 			// CbDgvEdit
 			// 
@@ -596,12 +599,26 @@
 			this.BtnResultUndo.UseVisualStyleBackColor = false;
 			this.BtnResultUndo.Click += new System.EventHandler(this.BtnResultUndo_Click);
 			// 
+			// LblResult
+			// 
+			this.LblResult.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.LblResult.AutoSize = true;
+			this.LblResult.Font = new System.Drawing.Font("ＭＳ ゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.LblResult.ForeColor = System.Drawing.Color.Snow;
+			this.LblResult.Location = new System.Drawing.Point(150, 409);
+			this.LblResult.Margin = new System.Windows.Forms.Padding(0);
+			this.LblResult.Name = "LblResult";
+			this.LblResult.Size = new System.Drawing.Size(70, 13);
+			this.LblResult.TabIndex = 12;
+			this.LblResult.Text = "LblResult";
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.DimGray;
 			this.ClientSize = new System.Drawing.Size(464, 441);
+			this.Controls.Add(this.LblResult);
 			this.Controls.Add(this.CbDgvEdit);
 			this.Controls.Add(this.DgvEdit);
 			this.Controls.Add(this.CbDgvCmd);
@@ -680,6 +697,7 @@
 		private System.Windows.Forms.DataGridViewTextBoxColumn Dgv_Tbc21;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Dgv_Tbc22;
 		private System.Windows.Forms.DataGridViewTextBoxColumn DgvCmd01;
+		private System.Windows.Forms.Label LblResult;
 	}
 }
 

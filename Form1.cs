@@ -22,7 +22,7 @@ namespace iwm_commandliner2
 		// 大域定数
 		//-----------
 		private const string VERSION =
-			"Ver.20190908_2010 'A-29'" + CRLF +
+			"Ver.20190910_2218 'A-29'" + CRLF +
 			"(C)2018-2019 iwm-iwama" + CRLF
 		;
 
@@ -45,7 +45,7 @@ namespace iwm_commandliner2
 			{ "#toLower",  "小文字に変換" },
 			{ "#toWide",   "全角に変換" },
 			{ "#toNarrow", "半角に変換" },
-			{ "#erase",    "消去 \"開始位置\" \"文字数\" (例) #erase \"0\" \"20\"" },
+			{ "#erase",    "消去 \"開始位置\" \"終了位置\" (例) #erase \"0\" \"5\"" },
 			{ "#sort",     "ソート" },
 			{ "#uniq",     "ソート後、重複行を消去" },
 			{ "#x1",       "空白行削除" },
@@ -109,6 +109,9 @@ namespace iwm_commandliner2
 			{
 				_ = DgvEdit.Rows.Add(ACmd[_i1, 0], ACmd[_i1, 1]);
 			}
+
+			// LblResult
+			TbResult_MouseUp(sender, null);
 
 			// フォントサイズ
 			NumericUpDown1.Value = (int)Math.Round(TbResult.Font.Size);
@@ -642,8 +645,27 @@ namespace iwm_commandliner2
 					break;
 
 				default:
+					TbResult_MouseUp(sender, null);
 					break;
 			}
+		}
+
+		private void TbResult_MouseUp(object sender, MouseEventArgs e)
+		{
+			string s1 = TbResult.SelectedText;
+			string s2 = CRLF;
+
+			int iCrlf = 0;
+
+			int iPos = s1.IndexOf(s2);
+			while (0 <= iPos && iPos < s1.Length)
+			{
+				++iCrlf;
+				iPos = s1.IndexOf(s2, iPos + s2.Length);
+			}
+
+			int iCnt = TbResult.SelectionLength - (iCrlf * 2);
+			LblResult.Text = iCnt > 0 ? iCnt.ToString() + "字(" + (iCrlf + 1).ToString() + "行)選択" : "";
 		}
 
 		//-------------
@@ -1275,75 +1297,105 @@ namespace iwm_commandliner2
 		//-----------
 		private void SubTextBoxEraseInLine(
 			TextBox tb,
-			string sStartIndex,
-			string sLength
+			string sBgnPos,
+			string sEndPos
 		)
 		{
-			int iStart;
+			int iBgnPos;
 			try
 			{
-				iStart = int.Parse(sStartIndex);
-
-				if (iStart < 0)
-				{
-					iStart = 0;
-				}
+				iBgnPos = int.Parse(sBgnPos);
 			}
 			catch
 			{
-				iStart = 0;
+				iBgnPos = 0;
+			}
+
+			int iEndPos;
+			try
+			{
+				iEndPos = int.Parse(sEndPos);
+			}
+			catch
+			{
+				iEndPos = -1;
 			}
 
 			_ = SB.Clear();
 
 			foreach (string _s1 in tb.Text.Split('\n'))
 			{
-				string _s2 = _s1.TrimEnd();
-
-				if (_s2.Length > 0 && _s2.Length >= iStart)
-				{
-					if (iStart > 0)
-					{
-						_ = SB.Append(_s2.Substring(0, iStart));
-					}
-
-					int iLen;
-					try
-					{
-						iLen = int.Parse(sLength);
-
-						if (iLen < 0)
-						{
-							iLen = 0;
-						}
-					}
-					catch
-					{
-						iLen = _s2.Length;
-					}
-
-					if (iStart + iLen >= _s2.Length)
-					{
-						iLen = _s2.Length - iStart;
-					}
-
-					for (int _i1 = 0; _i1 < iLen; _i1++)
-					{
-						_ = SB.Append(" ");
-					}
-
-					_ = SB.Append(_s1.Substring(iStart + iLen));
-				}
-				else
-				{
-					_ = SB.Append(_s2);
-				}
-
-				_ = SB.Append(CRLF);
+				string _s2 = _s1.TrimEnd('\r');
+				_ = SB.Append(RtnErasePos(_s2, " ", iBgnPos, iEndPos) + CRLF);
 			}
 
 			tb.Text = SB.ToString();
 			tb.Select(tb.TextLength, 0);
+		}
+
+		private string RtnErasePos(
+			string sStr = "",
+			string sRep = "",
+			int iBgnPos = 0, // 例： 0.. 4
+			int iEndPos = -1 // 例：-5..-1
+		)
+		{
+			// iBgnPos の正位置は？
+			if (iBgnPos < 0)
+			{
+				// マイナスのとき +1
+				iBgnPos += sStr.Length + 1;
+			}
+
+			if (iBgnPos > sStr.Length)
+			{
+				iBgnPos = sStr.Length;
+			}
+
+			// iEndPos の正位置は？
+			if (iEndPos < 0)
+			{
+				// マイナスのとき +1
+				iEndPos += sStr.Length + 1;
+			}
+
+			// Swap
+			if (iBgnPos > iEndPos)
+			{
+				int _i1 = iEndPos;
+				iEndPos = iBgnPos;
+				iBgnPos = _i1;
+			}
+
+			// 最終補正
+			if (iBgnPos < 0)
+			{
+				iBgnPos = 0;
+			}
+
+			if (iEndPos > sStr.Length)
+			{
+				iEndPos = sStr.Length;
+			}
+
+			string rtn = "";
+
+			// 前
+			if (iBgnPos > 0)
+			{
+				rtn += sStr.Substring(0, iBgnPos);
+			}
+
+			// 中
+			for (int _i1 = 0; _i1 < (iEndPos - iBgnPos); _i1++)
+			{
+				rtn += sRep;
+			}
+
+			// 後
+			rtn += sStr.Substring(iEndPos);
+
+			return rtn;
 		}
 
 		//-------------

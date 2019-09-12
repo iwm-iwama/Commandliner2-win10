@@ -22,7 +22,7 @@ namespace iwm_commandliner2
 		// 大域定数
 		//-----------
 		private const string VERSION =
-			"Ver.20190912_1732 'A-29'" + CRLF +
+			"Ver.20190912_2257 'A-29'" + CRLF +
 			"(C)2018-2019 iwm-iwama" + CRLF
 		;
 
@@ -712,9 +712,14 @@ namespace iwm_commandliner2
 			SubTbCmdFocus();
 		}
 
-		//-------
-		// 停止
-		//-------
+		//-------------
+		// 実行／停止
+		//-------------
+		private void BtnCmdExec_Click(object sender, EventArgs e)
+		{
+			SubTbCmdExec(sender, e);
+		}
+
 		private void BtnCmdStop_Click(object sender, EventArgs e)
 		{
 			SubKillProcessTree(P1);
@@ -1163,6 +1168,9 @@ namespace iwm_commandliner2
 				return;
 			}
 
+			// 特殊文字を置換
+			sRegex = sRegex.Replace("|", "\\|");
+
 			Regex rgx;
 
 			try
@@ -1174,15 +1182,14 @@ namespace iwm_commandliner2
 				return;
 			}
 
-			string s1 = tb.Text;
-
 			_ = SB.Clear();
 
-			foreach (string _s1 in s1.Split('\n'))
+			foreach (string _s1 in tb.Text.Split('\n'))
 			{
-				if (bMatch == rgx.IsMatch(_s1))
+				string _s2 = _s1.TrimEnd('\r');
+				if (bMatch == rgx.IsMatch(_s2))
 				{
-					_ = SB.Append(_s1 + CRLF);
+					_ = SB.Append(_s2 + CRLF);
 				}
 			}
 
@@ -1226,16 +1233,16 @@ namespace iwm_commandliner2
 
 			foreach (string _s1 in tb.Text.Split('\n'))
 			{
-				_ = SB.Append(rgx.Replace(_s1, sNew) + CRLF);
+				_ = SB.Append(rgx.Replace(_s1.TrimEnd('\r'), sNew) + CRLF);
 			}
 
 			tb.Text = SB.ToString();
 			tb.Select(tb.TextLength, 0);
 		}
 
-		//-------------
+		//-----------
 		// 分割変換
-		//-------------
+		//-----------
 		private void SubTextBoxSplitCnv(
 			TextBox tb,
 			string sSplit,
@@ -1246,6 +1253,9 @@ namespace iwm_commandliner2
 			{
 				return;
 			}
+
+			// 特殊文字を置換
+			sSplit = sSplit.Replace("|", "\\|");
 
 			Regex rgx1, rgx2;
 
@@ -1259,17 +1269,17 @@ namespace iwm_commandliner2
 				return;
 			}
 
-			string s1 = tb.Text;
-
 			_ = SB.Clear();
 
-			foreach (string _s1 in s1.Split('\n'))
+			foreach (string _s1 in tb.Text.Split('\n'))
 			{
-				string[] a1 = rgx2.Split(_s1);
+				string _s2 = _s1.TrimEnd('\r');
 
-				if (a1[0].Length > 0)
+				if (_s2.Length > 0)
 				{
-					string _s2 = sRegex;
+					string[] a1 = rgx2.Split(_s2);
+
+					_s2 = sRegex;
 					for (int _i1 = 0; _i1 < a1.Length; _i1++)
 					{
 						_s2 = _s2.Replace("[" + _i1.ToString() + "]", a1[_i1]);
@@ -1324,8 +1334,7 @@ namespace iwm_commandliner2
 
 			foreach (string _s1 in tb.Text.Split('\n'))
 			{
-				string _s2 = _s1.TrimEnd('\r');
-				_ = SB.Append(RtnErasePos(_s2, " ", iBgnPos, iEndPos) + CRLF);
+				_ = SB.Append(RtnErasePos(_s1.TrimEnd('\r'), " ", iBgnPos, iEndPos) + CRLF);
 			}
 
 			tb.Text = SB.ToString();
@@ -1455,17 +1464,6 @@ namespace iwm_commandliner2
 			}
 
 			return rtn;
-		}
-
-
-
-
-
-
-
-		private void BtnCmdExec_Click(object sender, EventArgs e)
-		{
-			SubTbCmdExec(sender, e);
 		}
 	}
 }

@@ -22,7 +22,7 @@ namespace iwm_commandliner2
 		// 大域定数
 		//-----------
 		private const string VERSION =
-			"Ver.20190910_2218 'A-29'" + CRLF +
+			"Ver.20190912_1230 'A-29'" + CRLF +
 			"(C)2018-2019 iwm-iwama" + CRLF
 		;
 
@@ -170,8 +170,14 @@ namespace iwm_commandliner2
 
 		private void TbCmd_KeyUp(object sender, KeyEventArgs e)
 		{
-			// Font固定
+			// Fontを戻す
 			TbCmd.Font = new Font(TbCmd.Font.Name, TbCmd.Font.Size);
+
+			// [Ctrl+V] のとき
+			if (e.KeyData == (Keys.Control | Keys.V))
+			{
+				TbCmd.Text = TbCmd.Text.Replace(CRLF, " ").Trim();
+			}
 
 			int iLen = TbCmd.TextLength;
 			int i1;
@@ -179,7 +185,7 @@ namespace iwm_commandliner2
 			switch (e.KeyCode)
 			{
 				case Keys.Enter:
-					SubBtnCmdExec(sender, null);
+					SubTbCmdExec(sender, null);
 					SubTbCmdFocus();
 					break;
 
@@ -290,6 +296,7 @@ namespace iwm_commandliner2
 			if (data != null && data.GetDataPresent(DataFormats.Text) == true)
 			{
 				TbCmd.Paste();
+				TbCmd.Text = TbCmd.Text.Replace(CRLF, " ").Trim();
 			}
 		}
 
@@ -741,9 +748,9 @@ namespace iwm_commandliner2
 		//-------
 		// 実行
 		//-------
-		private void SubBtnCmdExec(object sender, EventArgs e)
+		private void SubTbCmdExec(object sender, EventArgs e)
 		{
-			TbCmd.Text = TbCmd.Text.Replace(CRLF, "").Trim();
+			TbCmd.Text = TbCmd.Text.Replace(CRLF, " ").Trim();
 
 			if (TbCmd.Text.Length == 0)
 			{
@@ -1001,12 +1008,7 @@ namespace iwm_commandliner2
 			IDataObject data = Clipboard.GetDataObject();
 			if (data != null && data.GetDataPresent(DataFormats.Text) == true)
 			{
-				_ = SB.Clear();
-				foreach (string _s1 in Clipboard.GetText().Split('\n'))
-				{
-					_ = SB.Append(_s1.TrimEnd());
-				}
-				_ = SendMessage(TbResult.Handle, EM_REPLACESEL, 1, SB.ToString());
+				TbResult.Paste();
 			}
 		}
 

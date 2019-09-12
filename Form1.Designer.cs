@@ -59,6 +59,7 @@
 			this.CmsNull = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.ToolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.BtnTbResultWrite = new System.Windows.Forms.Button();
+			this.button1 = new System.Windows.Forms.Button();
 			this.NumericUpDown1 = new System.Windows.Forms.NumericUpDown();
 			this.Lbl2 = new System.Windows.Forms.Label();
 			this.BtnCmdRedo = new System.Windows.Forms.Button();
@@ -91,10 +92,10 @@
 			this.BtnCmdStop.Margin = new System.Windows.Forms.Padding(0);
 			this.BtnCmdStop.Name = "BtnCmdStop";
 			this.BtnCmdStop.Size = new System.Drawing.Size(22, 22);
-			this.BtnCmdStop.TabIndex = 7;
+			this.BtnCmdStop.TabIndex = 8;
 			this.BtnCmdStop.TabStop = false;
 			this.BtnCmdStop.Text = "✖";
-			this.ToolTip1.SetToolTip(this.BtnCmdStop, "実行中断");
+			this.ToolTip1.SetToolTip(this.BtnCmdStop, "中断");
 			this.BtnCmdStop.UseVisualStyleBackColor = false;
 			this.BtnCmdStop.Click += new System.EventHandler(this.BtnCmdStop_Click);
 			// 
@@ -383,6 +384,25 @@
 			this.BtnTbResultWrite.UseVisualStyleBackColor = false;
 			this.BtnTbResultWrite.Click += new System.EventHandler(this.BtnTbResultWrite_Click);
 			// 
+			// button1
+			// 
+			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.button1.BackColor = System.Drawing.Color.DimGray;
+			this.button1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+			this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.button1.Font = new System.Drawing.Font("Yu Gothic UI", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.button1.ForeColor = System.Drawing.Color.White;
+			this.button1.Location = new System.Drawing.Point(400, 80);
+			this.button1.Margin = new System.Windows.Forms.Padding(0);
+			this.button1.Name = "button1";
+			this.button1.Size = new System.Drawing.Size(22, 22);
+			this.button1.TabIndex = 7;
+			this.button1.TabStop = false;
+			this.button1.Text = "●";
+			this.ToolTip1.SetToolTip(this.button1, "実行");
+			this.button1.UseVisualStyleBackColor = false;
+			this.button1.Click += new System.EventHandler(this.BtnCmdExec_Click);
+			// 
 			// NumericUpDown1
 			// 
 			this.NumericUpDown1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -392,7 +412,7 @@
 			this.NumericUpDown1.Cursor = System.Windows.Forms.Cursors.Default;
 			this.NumericUpDown1.Font = new System.Drawing.Font("ＭＳ ゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.NumericUpDown1.ForeColor = System.Drawing.Color.White;
-			this.NumericUpDown1.Location = new System.Drawing.Point(360, 406);
+			this.NumericUpDown1.Location = new System.Drawing.Point(360, 407);
 			this.NumericUpDown1.Margin = new System.Windows.Forms.Padding(0);
 			this.NumericUpDown1.Maximum = new decimal(new int[] {
             288,
@@ -422,7 +442,7 @@
 			this.Lbl2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.Lbl2.Font = new System.Drawing.Font("ＭＳ Ｐゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.Lbl2.ForeColor = System.Drawing.Color.Snow;
-			this.Lbl2.Location = new System.Drawing.Point(405, 407);
+			this.Lbl2.Location = new System.Drawing.Point(405, 408);
 			this.Lbl2.Margin = new System.Windows.Forms.Padding(0);
 			this.Lbl2.Name = "Lbl2";
 			this.Lbl2.Size = new System.Drawing.Size(20, 15);
@@ -605,7 +625,7 @@
 			this.LblResult.AutoSize = true;
 			this.LblResult.Font = new System.Drawing.Font("ＭＳ ゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.LblResult.ForeColor = System.Drawing.Color.Snow;
-			this.LblResult.Location = new System.Drawing.Point(150, 409);
+			this.LblResult.Location = new System.Drawing.Point(150, 408);
 			this.LblResult.Margin = new System.Windows.Forms.Padding(0);
 			this.LblResult.Name = "LblResult";
 			this.LblResult.Size = new System.Drawing.Size(70, 13);
@@ -618,6 +638,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.DimGray;
 			this.ClientSize = new System.Drawing.Size(464, 441);
+			this.Controls.Add(this.button1);
 			this.Controls.Add(this.LblResult);
 			this.Controls.Add(this.CbDgvEdit);
 			this.Controls.Add(this.DgvEdit);
@@ -698,6 +719,7 @@
 		private System.Windows.Forms.DataGridViewTextBoxColumn Dgv_Tbc22;
 		private System.Windows.Forms.DataGridViewTextBoxColumn DgvCmd01;
 		private System.Windows.Forms.Label LblResult;
+		private System.Windows.Forms.Button button1;
 	}
 }
 

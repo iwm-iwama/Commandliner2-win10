@@ -22,7 +22,7 @@ namespace iwm_commandliner2
 		// 大域定数
 		//-----------
 		private const string VERSION =
-			"Ver.20190912_1230 'A-29'" + CRLF +
+			"Ver.20190912_1732 'A-29'" + CRLF +
 			"(C)2018-2019 iwm-iwama" + CRLF
 		;
 
@@ -750,11 +750,12 @@ namespace iwm_commandliner2
 		//-------
 		private void SubTbCmdExec(object sender, EventArgs e)
 		{
-			TbCmd.Text = TbCmd.Text.Replace(CRLF, " ").Trim();
+			TbResult.Enabled = false;
+
+			TbCmd.Text = TbCmd.Text.Replace(CRLF, null).Trim();
 
 			if (TbCmd.Text.Length == 0)
 			{
-				SubTbCmdFocus();
 				return;
 			}
 
@@ -951,11 +952,7 @@ namespace iwm_commandliner2
 				_ = P1.Start();
 				P1.BeginOutputReadLine();
 				// 不可 P.Close() => 終了コードを返さないので書くな!!
-
-				TbResult.Enabled = false;
 			}
-
-			SubTbCmdFocus();
 		}
 
 		private void EventDataReceived(object sender, DataReceivedEventArgs e)
@@ -1229,7 +1226,7 @@ namespace iwm_commandliner2
 
 			foreach (string _s1 in tb.Text.Split('\n'))
 			{
-				_ = SB.Append(rgx.Replace(_s1.Trim(), sNew) + CRLF);
+				_ = SB.Append(rgx.Replace(_s1, sNew) + CRLF);
 			}
 
 			tb.Text = SB.ToString();
@@ -1268,7 +1265,7 @@ namespace iwm_commandliner2
 
 			foreach (string _s1 in s1.Split('\n'))
 			{
-				string[] a1 = rgx2.Split(_s1.Trim());
+				string[] a1 = rgx2.Split(_s1);
 
 				if (a1[0].Length > 0)
 				{
@@ -1458,6 +1455,17 @@ namespace iwm_commandliner2
 			}
 
 			return rtn;
+		}
+
+
+
+
+
+
+
+		private void BtnCmdExec_Click(object sender, EventArgs e)
+		{
+			SubTbCmdExec(sender, e);
 		}
 	}
 }

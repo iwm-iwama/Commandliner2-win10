@@ -22,7 +22,7 @@ namespace iwm_commandliner2
 		// 大域定数
 		//-----------
 		private const string VERSION =
-			"Ver.20190913_1305 'A-29'" + CRLF +
+			"Ver.20190913_1739 'A-29'" + CRLF +
 			"(C)2018-2019 iwm-iwama" + CRLF
 		;
 

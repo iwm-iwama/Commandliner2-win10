@@ -22,7 +22,7 @@ namespace iwm_commandliner2
 		// 大域定数
 		//-----------
 		private const string VERSION =
-			"Ver.20190912_2257 'A-29'" + CRLF +
+			"Ver.20190913_1305 'A-29'" + CRLF +
 			"(C)2018-2019 iwm-iwama" + CRLF
 		;
 
@@ -1184,12 +1184,13 @@ namespace iwm_commandliner2
 
 			_ = SB.Clear();
 
-			foreach (string _s1 in tb.Text.Split('\n'))
+			string[] splits = { CRLF };
+
+			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
 			{
-				string _s2 = _s1.TrimEnd('\r');
-				if (bMatch == rgx.IsMatch(_s2))
+				if (bMatch == rgx.IsMatch(_s1))
 				{
-					_ = SB.Append(_s2 + CRLF);
+					_ = SB.Append(_s1 + CRLF);
 				}
 			}
 
@@ -1231,9 +1232,11 @@ namespace iwm_commandliner2
 
 			_ = SB.Clear();
 
-			foreach (string _s1 in tb.Text.Split('\n'))
+			string[] splits = { CRLF };
+
+			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
 			{
-				_ = SB.Append(rgx.Replace(_s1.TrimEnd('\r'), sNew) + CRLF);
+				_ = SB.Append(rgx.Replace(_s1, sNew) + CRLF);
 			}
 
 			tb.Text = SB.ToString();
@@ -1271,15 +1274,15 @@ namespace iwm_commandliner2
 
 			_ = SB.Clear();
 
-			foreach (string _s1 in tb.Text.Split('\n'))
+			string[] splits = { CRLF };
+
+			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
 			{
-				string _s2 = _s1.TrimEnd('\r');
-
-				if (_s2.Length > 0)
+				if (_s1.Length > 0)
 				{
-					string[] a1 = rgx2.Split(_s2);
+					string[] a1 = rgx2.Split(_s1);
+					string _s2 = sRegex;
 
-					_s2 = sRegex;
 					for (int _i1 = 0; _i1 < a1.Length; _i1++)
 					{
 						_s2 = _s2.Replace("[" + _i1.ToString() + "]", a1[_i1]);
@@ -1332,9 +1335,11 @@ namespace iwm_commandliner2
 
 			_ = SB.Clear();
 
-			foreach (string _s1 in tb.Text.Split('\n'))
+			string[] splits = { CRLF };
+
+			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
 			{
-				_ = SB.Append(RtnErasePos(_s1.TrimEnd('\r'), " ", iBgnPos, iEndPos) + CRLF);
+				_ = SB.Append(RtnErasePos(_s1, " ", iBgnPos, iEndPos) + CRLF);
 			}
 
 			tb.Text = SB.ToString();

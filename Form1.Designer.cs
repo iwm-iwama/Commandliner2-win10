@@ -412,7 +412,7 @@
 			this.NumericUpDown1.Cursor = System.Windows.Forms.Cursors.Default;
 			this.NumericUpDown1.Font = new System.Drawing.Font("ＭＳ ゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.NumericUpDown1.ForeColor = System.Drawing.Color.White;
-			this.NumericUpDown1.Location = new System.Drawing.Point(360, 407);
+			this.NumericUpDown1.Location = new System.Drawing.Point(360, 406);
 			this.NumericUpDown1.Margin = new System.Windows.Forms.Padding(0);
 			this.NumericUpDown1.Maximum = new decimal(new int[] {
             288,
@@ -442,7 +442,7 @@
 			this.Lbl2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.Lbl2.Font = new System.Drawing.Font("ＭＳ Ｐゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.Lbl2.ForeColor = System.Drawing.Color.Snow;
-			this.Lbl2.Location = new System.Drawing.Point(405, 408);
+			this.Lbl2.Location = new System.Drawing.Point(405, 407);
 			this.Lbl2.Margin = new System.Windows.Forms.Padding(0);
 			this.Lbl2.Name = "Lbl2";
 			this.Lbl2.Size = new System.Drawing.Size(20, 15);
@@ -638,24 +638,24 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.DimGray;
 			this.ClientSize = new System.Drawing.Size(464, 441);
-			this.Controls.Add(this.button1);
-			this.Controls.Add(this.LblResult);
 			this.Controls.Add(this.CbDgvEdit);
 			this.Controls.Add(this.DgvEdit);
 			this.Controls.Add(this.CbDgvCmd);
 			this.Controls.Add(this.TbDgvCmdSearch);
 			this.Controls.Add(this.DgvCmd);
-			this.Controls.Add(this.TbCurDir);
-			this.Controls.Add(this.TbCmd);
+			this.Controls.Add(this.button1);
 			this.Controls.Add(this.BtnCmdStop);
-			this.Controls.Add(this.BtnCmdRedo);
-			this.Controls.Add(this.BtnCmdUndo);
-			this.Controls.Add(this.BtnTbResultWrite);
-			this.Controls.Add(this.Lbl2);
+			this.Controls.Add(this.LblResult);
 			this.Controls.Add(this.NumericUpDown1);
+			this.Controls.Add(this.Lbl2);
+			this.Controls.Add(this.BtnTbResultWrite);
 			this.Controls.Add(this.BtnResultRedo);
 			this.Controls.Add(this.BtnResultUndo);
+			this.Controls.Add(this.BtnCmdUndo);
+			this.Controls.Add(this.BtnCmdRedo);
 			this.Controls.Add(this.TbResult);
+			this.Controls.Add(this.TbCmd);
+			this.Controls.Add(this.TbCurDir);
 			this.Font = new System.Drawing.Font("ＭＳ ゴシック", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.KeyPreview = true;
 			this.MinimumSize = new System.Drawing.Size(480, 480);

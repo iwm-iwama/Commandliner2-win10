@@ -86,7 +86,7 @@
 			this.BtnCmdStop.BackColor = System.Drawing.Color.Crimson;
 			this.BtnCmdStop.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
 			this.BtnCmdStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.BtnCmdStop.Font = new System.Drawing.Font("Yu Gothic UI", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.BtnCmdStop.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.BtnCmdStop.ForeColor = System.Drawing.Color.White;
 			this.BtnCmdStop.Location = new System.Drawing.Point(433, 80);
 			this.BtnCmdStop.Margin = new System.Windows.Forms.Padding(0);
@@ -371,7 +371,7 @@
 			this.BtnTbResultWrite.BackColor = System.Drawing.Color.DarkOrange;
 			this.BtnTbResultWrite.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
 			this.BtnTbResultWrite.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.BtnTbResultWrite.Font = new System.Drawing.Font("Yu Gothic UI", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.BtnTbResultWrite.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.BtnTbResultWrite.ForeColor = System.Drawing.Color.White;
 			this.BtnTbResultWrite.Location = new System.Drawing.Point(433, 405);
 			this.BtnTbResultWrite.Margin = new System.Windows.Forms.Padding(0);
@@ -390,7 +390,7 @@
 			this.button1.BackColor = System.Drawing.Color.DimGray;
 			this.button1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
 			this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.button1.Font = new System.Drawing.Font("Yu Gothic UI", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.button1.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.button1.ForeColor = System.Drawing.Color.White;
 			this.button1.Location = new System.Drawing.Point(400, 80);
 			this.button1.Margin = new System.Windows.Forms.Padding(0);
@@ -453,7 +453,7 @@
 			// BtnCmdRedo
 			// 
 			this.BtnCmdRedo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.BtnCmdRedo.Font = new System.Drawing.Font("Yu Gothic UI", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.BtnCmdRedo.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.BtnCmdRedo.ForeColor = System.Drawing.Color.White;
 			this.BtnCmdRedo.Location = new System.Drawing.Point(40, 80);
 			this.BtnCmdRedo.Margin = new System.Windows.Forms.Padding(0);
@@ -468,7 +468,7 @@
 			// BtnCmdUndo
 			// 
 			this.BtnCmdUndo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.BtnCmdUndo.Font = new System.Drawing.Font("Yu Gothic UI", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.BtnCmdUndo.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.BtnCmdUndo.ForeColor = System.Drawing.Color.White;
 			this.BtnCmdUndo.Location = new System.Drawing.Point(10, 80);
 			this.BtnCmdUndo.Margin = new System.Windows.Forms.Padding(0);
@@ -590,7 +590,7 @@
 			// 
 			this.BtnResultRedo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.BtnResultRedo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.BtnResultRedo.Font = new System.Drawing.Font("Yu Gothic UI", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.BtnResultRedo.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.BtnResultRedo.ForeColor = System.Drawing.Color.White;
 			this.BtnResultRedo.Location = new System.Drawing.Point(40, 405);
 			this.BtnResultRedo.Margin = new System.Windows.Forms.Padding(0);
@@ -607,7 +607,7 @@
 			this.BtnResultUndo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.BtnResultUndo.BackColor = System.Drawing.Color.DimGray;
 			this.BtnResultUndo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.BtnResultUndo.Font = new System.Drawing.Font("Yu Gothic UI", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.BtnResultUndo.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.BtnResultUndo.ForeColor = System.Drawing.Color.White;
 			this.BtnResultUndo.Location = new System.Drawing.Point(10, 405);
 			this.BtnResultUndo.Margin = new System.Windows.Forms.Padding(0);

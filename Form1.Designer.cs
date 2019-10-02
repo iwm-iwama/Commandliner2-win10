@@ -59,7 +59,7 @@
 			this.CmsNull = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.ToolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.BtnTbResultWrite = new System.Windows.Forms.Button();
-			this.button1 = new System.Windows.Forms.Button();
+			this.BtnCmdExec = new System.Windows.Forms.Button();
 			this.NumericUpDown1 = new System.Windows.Forms.NumericUpDown();
 			this.Lbl2 = new System.Windows.Forms.Label();
 			this.BtnCmdRedo = new System.Windows.Forms.Button();
@@ -384,24 +384,24 @@
 			this.BtnTbResultWrite.UseVisualStyleBackColor = false;
 			this.BtnTbResultWrite.Click += new System.EventHandler(this.BtnTbResultWrite_Click);
 			// 
-			// button1
+			// BtnCmdExec
 			// 
-			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.button1.BackColor = System.Drawing.Color.DimGray;
-			this.button1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-			this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.button1.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-			this.button1.ForeColor = System.Drawing.Color.White;
-			this.button1.Location = new System.Drawing.Point(402, 80);
-			this.button1.Margin = new System.Windows.Forms.Padding(0);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(22, 22);
-			this.button1.TabIndex = 7;
-			this.button1.TabStop = false;
-			this.button1.Text = "■";
-			this.ToolTip1.SetToolTip(this.button1, "実行");
-			this.button1.UseVisualStyleBackColor = false;
-			this.button1.Click += new System.EventHandler(this.BtnCmdExec_Click);
+			this.BtnCmdExec.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.BtnCmdExec.BackColor = System.Drawing.Color.DimGray;
+			this.BtnCmdExec.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+			this.BtnCmdExec.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.BtnCmdExec.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.BtnCmdExec.ForeColor = System.Drawing.Color.White;
+			this.BtnCmdExec.Location = new System.Drawing.Point(402, 80);
+			this.BtnCmdExec.Margin = new System.Windows.Forms.Padding(0);
+			this.BtnCmdExec.Name = "BtnCmdExec";
+			this.BtnCmdExec.Size = new System.Drawing.Size(22, 22);
+			this.BtnCmdExec.TabIndex = 7;
+			this.BtnCmdExec.TabStop = false;
+			this.BtnCmdExec.Text = "■";
+			this.ToolTip1.SetToolTip(this.BtnCmdExec, "実行");
+			this.BtnCmdExec.UseVisualStyleBackColor = false;
+			this.BtnCmdExec.Click += new System.EventHandler(this.BtnCmdExec_Click);
 			// 
 			// NumericUpDown1
 			// 
@@ -645,7 +645,7 @@
 			this.Controls.Add(this.CbDgvCmd);
 			this.Controls.Add(this.TbDgvCmdSearch);
 			this.Controls.Add(this.DgvCmd);
-			this.Controls.Add(this.button1);
+			this.Controls.Add(this.BtnCmdExec);
 			this.Controls.Add(this.BtnCmdStop);
 			this.Controls.Add(this.LblResult);
 			this.Controls.Add(this.NumericUpDown1);
@@ -721,7 +721,7 @@
 		private System.Windows.Forms.DataGridViewTextBoxColumn Dgv_Tbc22;
 		private System.Windows.Forms.DataGridViewTextBoxColumn DgvCmd01;
 		private System.Windows.Forms.Label LblResult;
-		private System.Windows.Forms.Button button1;
+		private System.Windows.Forms.Button BtnCmdExec;
 	}
 }
 

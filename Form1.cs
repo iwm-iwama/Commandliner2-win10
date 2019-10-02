@@ -22,7 +22,7 @@ namespace iwm_commandliner2
 		// 大域定数
 		//-----------
 		private const string VERSION =
-			"Ver.20191001_2230 'A-29'" + CRLF +
+			"Ver.20191002_1831 'A-29'" + CRLF +
 			"(C)2018-2019 iwm-iwama" + CRLF
 		;
 
@@ -161,13 +161,7 @@ namespace iwm_commandliner2
 
 			SubTbCmdFocus();
 
-			try
-			{
-				TbResult.Enabled = true;
-			}
-			catch
-			{
-			}
+			TbResult.Enabled = true;
 		}
 
 		private void TbCmd_KeyUp(object sender, KeyEventArgs e)
@@ -188,7 +182,7 @@ namespace iwm_commandliner2
 			{
 				case Keys.Enter:
 					SubTbCmdExec(sender, null);
-					SubTbCmdFocus();
+					_ = BtnCmdExec.Focus();
 					break;
 
 				case Keys.Up:

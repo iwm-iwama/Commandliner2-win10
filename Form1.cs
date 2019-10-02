@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-//using System.ComponentModel;
-//using System.Data;
+using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -22,7 +22,7 @@ namespace iwm_commandliner2
 		// 大域定数
 		//-----------
 		private const string VERSION =
-			"Ver.20190913_1739 'A-29'" + CRLF +
+			"Ver.20191001_2230 'A-29'" + CRLF +
 			"(C)2018-2019 iwm-iwama" + CRLF
 		;
 
@@ -51,6 +51,8 @@ namespace iwm_commandliner2
 			{ "#x1",       "空白行削除" },
 			{ "#x2",       "行番号付与" },
 			{ "#x3",       "行数カウント" },
+			{ "#calc",     "計算機     (例) #calc \"(1.5+2.5)/3\"" },
+			{ "#now",      "現在時刻" },
 			{ "#version",  "バージョン" }
 		};
 
@@ -310,7 +312,7 @@ namespace iwm_commandliner2
 				DgvEdit.Enabled = true;
 				DgvEdit.ScrollBars = ScrollBars.Vertical;
 				DgvEdit.Width = 374;
-				DgvEdit.Height = 340;
+				DgvEdit.Height = 350;
 			}
 			else
 			{
@@ -435,7 +437,7 @@ namespace iwm_commandliner2
 				DgvCmd.Enabled = true;
 				DgvCmd.ScrollBars = ScrollBars.Both;
 				DgvCmd.Width = 291;
-				DgvCmd.Height = 340;
+				DgvCmd.Height = 350;
 				TbDgvCmdSearch.Visible = true;
 			}
 			else
@@ -675,6 +677,22 @@ namespace iwm_commandliner2
 			LblResult.Text = iCnt > 0 ? iCnt.ToString() + "字(" + (iCrlf + 1).ToString() + "行)選択" : "";
 		}
 
+		private string StrTbResult = "";
+
+		private void TbResult_Enter(object sender, EventArgs e)
+		{
+			StrTbResult = TbResult.Text;
+		}
+
+		private void TbResult_Leave(object sender, EventArgs e)
+		{
+			if (TbResult.Text != StrTbResult)
+			{
+				LResultHistory.Add(TbResult.Text);
+				LResultHistoryPos = LResultHistory.Count;
+			}
+		}
+
 		//-------------
 		// Undo／Redo
 		//-------------
@@ -748,7 +766,7 @@ namespace iwm_commandliner2
 				{
 				}
 			}
-		}
+  }
 
 		//-------
 		// 実行
@@ -935,6 +953,27 @@ namespace iwm_commandliner2
 						_ = SendMessage(TbResult.Handle, EM_REPLACESEL, 1, string.Format("{3}{2}全行数　 : {0}{3}有効行数 : {1}{3}{2}", cntAll, cntActive, LN, CRLF));
 						break;
 
+					// 計算機
+					case "#calc":
+						using (DataTable dt = new DataTable())
+						{
+							try
+							{
+								object o1 = dt.Compute(aOp[1], "");
+								TbResult.Text = o1.ToString().TrimEnd('.', '0');
+							}
+							catch
+							{
+								TbResult.Text = "";
+							}
+						}
+						break;
+
+					// 現在時刻
+					case "#now":
+						TbResult.Text = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+						break;
+
 					// バージョン
 					case "#version":
 						TbResult.Text = LN + VERSION + LN;
@@ -943,6 +982,8 @@ namespace iwm_commandliner2
 					default:
 						break;
 				}
+
+				TbResult.Enabled = true;
 			}
 			else
 			{
@@ -1129,27 +1170,25 @@ namespace iwm_commandliner2
 			string code
 		)
 		{
-			using (SaveFileDialog saveFileDialog1 = new SaveFileDialog
-			{
+			using (SaveFileDialog saveFileDialog1 = new SaveFileDialog{
 				InitialDirectory = ".",
 				FileName = DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".txt",
 				Filter = "All files (*.*)|*.*",
 				FilterIndex = 1
 			})
-			{
-				if (saveFileDialog1.ShowDialog() == DialogResult.OK)
-				{
-					switch (code.ToUpper())
-					{
-						case "UTF-8N":
-							UTF8Encoding utf8nEnc = new UTF8Encoding(false);
-							File.WriteAllText(saveFileDialog1.FileName, tb.Text, utf8nEnc);
-							break;
 
-						default:
-							File.WriteAllText(saveFileDialog1.FileName, tb.Text, Encoding.GetEncoding("Shift_JIS"));
-							break;
-					}
+			if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+			{
+				switch (code.ToUpper())
+				{
+					case "UTF-8N":
+						UTF8Encoding utf8nEnc = new UTF8Encoding(false);
+						File.WriteAllText(saveFileDialog1.FileName, tb.Text, utf8nEnc);
+						break;
+
+					default:
+						File.WriteAllText(saveFileDialog1.FileName, tb.Text, Encoding.GetEncoding("Shift_JIS"));
+						break;
 				}
 			}
 		}

@@ -379,7 +379,7 @@
 			this.BtnTbResultWrite.Size = new System.Drawing.Size(22, 22);
 			this.BtnTbResultWrite.TabIndex = 15;
 			this.BtnTbResultWrite.TabStop = false;
-			this.BtnTbResultWrite.Text = "★";
+			this.BtnTbResultWrite.Text = "●";
 			this.ToolTip1.SetToolTip(this.BtnTbResultWrite, "画面ロック解除");
 			this.BtnTbResultWrite.UseVisualStyleBackColor = false;
 			this.BtnTbResultWrite.Click += new System.EventHandler(this.BtnTbResultWrite_Click);
@@ -392,13 +392,13 @@
 			this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.button1.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.button1.ForeColor = System.Drawing.Color.White;
-			this.button1.Location = new System.Drawing.Point(400, 80);
+			this.button1.Location = new System.Drawing.Point(402, 80);
 			this.button1.Margin = new System.Windows.Forms.Padding(0);
 			this.button1.Name = "button1";
 			this.button1.Size = new System.Drawing.Size(22, 22);
 			this.button1.TabIndex = 7;
 			this.button1.TabStop = false;
-			this.button1.Text = "●";
+			this.button1.Text = "■";
 			this.ToolTip1.SetToolTip(this.button1, "実行");
 			this.button1.UseVisualStyleBackColor = false;
 			this.button1.Click += new System.EventHandler(this.BtnCmdExec_Click);
@@ -412,7 +412,7 @@
 			this.NumericUpDown1.Cursor = System.Windows.Forms.Cursors.Default;
 			this.NumericUpDown1.Font = new System.Drawing.Font("ＭＳ ゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.NumericUpDown1.ForeColor = System.Drawing.Color.White;
-			this.NumericUpDown1.Location = new System.Drawing.Point(360, 406);
+			this.NumericUpDown1.Location = new System.Drawing.Point(365, 406);
 			this.NumericUpDown1.Margin = new System.Windows.Forms.Padding(0);
 			this.NumericUpDown1.Maximum = new decimal(new int[] {
             288,
@@ -442,7 +442,7 @@
 			this.Lbl2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.Lbl2.Font = new System.Drawing.Font("ＭＳ Ｐゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.Lbl2.ForeColor = System.Drawing.Color.Snow;
-			this.Lbl2.Location = new System.Drawing.Point(405, 407);
+			this.Lbl2.Location = new System.Drawing.Point(409, 407);
 			this.Lbl2.Margin = new System.Windows.Forms.Padding(0);
 			this.Lbl2.Name = "Lbl2";
 			this.Lbl2.Size = new System.Drawing.Size(20, 15);
@@ -557,7 +557,9 @@
 			this.TbResult.TabIndex = 9;
 			this.TbResult.TabStop = false;
 			this.TbResult.WordWrap = false;
+			this.TbResult.Enter += new System.EventHandler(this.TbResult_Enter);
 			this.TbResult.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TbResult_KeyUp);
+			this.TbResult.Leave += new System.EventHandler(this.TbResult_Leave);
 			this.TbResult.MouseUp += new System.Windows.Forms.MouseEventHandler(this.TbResult_MouseUp);
 			// 
 			// CbDgvEdit

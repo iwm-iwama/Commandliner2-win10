@@ -60,6 +60,7 @@
 			this.ToolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.BtnTbResultWrite = new System.Windows.Forms.Button();
 			this.BtnCmdExec = new System.Windows.Forms.Button();
+			this.BtnResultMem = new System.Windows.Forms.Button();
 			this.NumericUpDown1 = new System.Windows.Forms.NumericUpDown();
 			this.Lbl2 = new System.Windows.Forms.Label();
 			this.BtnCmdRedo = new System.Windows.Forms.Button();
@@ -392,7 +393,7 @@
 			this.BtnCmdExec.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.BtnCmdExec.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.BtnCmdExec.ForeColor = System.Drawing.Color.White;
-			this.BtnCmdExec.Location = new System.Drawing.Point(402, 80);
+			this.BtnCmdExec.Location = new System.Drawing.Point(404, 80);
 			this.BtnCmdExec.Margin = new System.Windows.Forms.Padding(0);
 			this.BtnCmdExec.Name = "BtnCmdExec";
 			this.BtnCmdExec.Size = new System.Drawing.Size(22, 22);
@@ -402,6 +403,24 @@
 			this.ToolTip1.SetToolTip(this.BtnCmdExec, "実行");
 			this.BtnCmdExec.UseVisualStyleBackColor = false;
 			this.BtnCmdExec.Click += new System.EventHandler(this.BtnCmdExec_Click);
+			// 
+			// BtnResultMem
+			// 
+			this.BtnResultMem.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.BtnResultMem.BackColor = System.Drawing.Color.DimGray;
+			this.BtnResultMem.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.BtnResultMem.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.BtnResultMem.ForeColor = System.Drawing.Color.White;
+			this.BtnResultMem.Location = new System.Drawing.Point(72, 405);
+			this.BtnResultMem.Margin = new System.Windows.Forms.Padding(0);
+			this.BtnResultMem.Name = "BtnResultMem";
+			this.BtnResultMem.Size = new System.Drawing.Size(25, 24);
+			this.BtnResultMem.TabIndex = 12;
+			this.BtnResultMem.TabStop = false;
+			this.BtnResultMem.Text = "◆";
+			this.ToolTip1.SetToolTip(this.BtnResultMem, "結果を記憶");
+			this.BtnResultMem.UseVisualStyleBackColor = false;
+			this.BtnResultMem.Click += new System.EventHandler(this.BtnResultMem_Click);
 			// 
 			// NumericUpDown1
 			// 
@@ -426,7 +445,7 @@
             0});
 			this.NumericUpDown1.Name = "NumericUpDown1";
 			this.NumericUpDown1.Size = new System.Drawing.Size(45, 20);
-			this.NumericUpDown1.TabIndex = 13;
+			this.NumericUpDown1.TabIndex = 14;
 			this.NumericUpDown1.TabStop = false;
 			this.NumericUpDown1.Value = new decimal(new int[] {
             10,
@@ -557,9 +576,7 @@
 			this.TbResult.TabIndex = 9;
 			this.TbResult.TabStop = false;
 			this.TbResult.WordWrap = false;
-			this.TbResult.Enter += new System.EventHandler(this.TbResult_Enter);
 			this.TbResult.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TbResult_KeyUp);
-			this.TbResult.Leave += new System.EventHandler(this.TbResult_Leave);
 			this.TbResult.MouseUp += new System.Windows.Forms.MouseEventHandler(this.TbResult_MouseUp);
 			// 
 			// CbDgvEdit
@@ -625,13 +642,13 @@
 			// 
 			this.LblResult.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.LblResult.AutoSize = true;
-			this.LblResult.Font = new System.Drawing.Font("ＭＳ ゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.LblResult.Font = new System.Drawing.Font("ＭＳ ゴシック", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.LblResult.ForeColor = System.Drawing.Color.Snow;
-			this.LblResult.Location = new System.Drawing.Point(150, 408);
+			this.LblResult.Location = new System.Drawing.Point(120, 408);
 			this.LblResult.Margin = new System.Windows.Forms.Padding(0);
 			this.LblResult.Name = "LblResult";
-			this.LblResult.Size = new System.Drawing.Size(70, 13);
-			this.LblResult.TabIndex = 12;
+			this.LblResult.Size = new System.Drawing.Size(59, 12);
+			this.LblResult.TabIndex = 13;
 			this.LblResult.Text = "LblResult";
 			// 
 			// Form1
@@ -640,6 +657,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.DimGray;
 			this.ClientSize = new System.Drawing.Size(464, 441);
+			this.Controls.Add(this.BtnResultMem);
 			this.Controls.Add(this.CbDgvEdit);
 			this.Controls.Add(this.DgvEdit);
 			this.Controls.Add(this.CbDgvCmd);
@@ -722,6 +740,7 @@
 		private System.Windows.Forms.DataGridViewTextBoxColumn DgvCmd01;
 		private System.Windows.Forms.Label LblResult;
 		private System.Windows.Forms.Button BtnCmdExec;
+		private System.Windows.Forms.Button BtnResultMem;
 	}
 }
 

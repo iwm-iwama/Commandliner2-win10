@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+//using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
@@ -22,7 +22,7 @@ namespace iwm_commandliner2
 		// 大域定数
 		//-----------
 		private const string VERSION =
-			"Ver.20191002_1831 'A-29'" + CRLF +
+			"Ver.20191005_1942 'A-29'" + CRLF +
 			"(C)2018-2019 iwm-iwama" + CRLF
 		;
 
@@ -51,8 +51,8 @@ namespace iwm_commandliner2
 			{ "#x1",       "空白行削除" },
 			{ "#x2",       "行番号付与" },
 			{ "#x3",       "行数カウント" },
-			{ "#calc",     "計算機     (例) #calc \"(1.5+2.5)/3\"" },
-			{ "#now",      "現在時刻" },
+			{ "#calc",     "計算機 (例) #calc \"(1.5+2.5)/3\"" },
+			{ "#now",      "現在日時" },
 			{ "#version",  "バージョン" }
 		};
 
@@ -655,36 +655,30 @@ namespace iwm_commandliner2
 
 		private void TbResult_MouseUp(object sender, MouseEventArgs e)
 		{
-			string s1 = TbResult.SelectedText;
-			string s2 = CRLF;
-
-			int iCrlf = 0;
-
-			int iPos = s1.IndexOf(s2);
-			while (0 <= iPos && iPos < s1.Length)
+			if (TbResult.SelectionLength == 0)
 			{
-				++iCrlf;
-				iPos = s1.IndexOf(s2, iPos + s2.Length);
+				LblResult.Text ="";
+				return;
 			}
 
-			int iCnt = TbResult.SelectionLength - (iCrlf * 2);
-			LblResult.Text = iCnt > 0 ? iCnt.ToString() + "字(" + (iCrlf + 1).ToString() + "行)選択" : "";
-		}
+			int iNL = 0;
+			int iRow = 0;
+			int iCnt = 0;
 
-		private string StrTbResult = "";
-
-		private void TbResult_Enter(object sender, EventArgs e)
-		{
-			StrTbResult = TbResult.Text;
-		}
-
-		private void TbResult_Leave(object sender, EventArgs e)
-		{
-			if (TbResult.Text != StrTbResult)
+			string[] splits = { CRLF };
+			foreach (string _s1 in TbResult.SelectedText.Split(splits, StringSplitOptions.None))
 			{
-				LResultHistory.Add(TbResult.Text);
-				LResultHistoryPos = LResultHistory.Count;
+				++iNL;
+
+				if (_s1.Trim().Length > 0)
+				{
+					++iRow;
+				}
+
+				iCnt += _s1.Length;
 			}
+
+			LblResult.Text = iCnt.ToString() + "字(全" + iNL.ToString() + "行／有効" + iRow.ToString() + "行)選択";
 		}
 
 		//-------------
@@ -784,21 +778,6 @@ namespace iwm_commandliner2
 
 				BtnCmdUndo.Enabled = true;
 				BtnCmdRedo.Enabled = false;
-			}
-
-			if (TbResult.Text.Length > 0 && TbResult.Text != LResultHistory[LResultHistory.Count - 1])
-			{
-				BoolResultAdd = true;
-
-				LResultHistory.Add(TbResult.Text);
-				LResultHistoryPos = LResultHistory.Count;
-
-				BtnResultUndo.Enabled = true;
-				BtnResultRedo.Enabled = false;
-			}
-			else
-			{
-				BoolResultAdd = false;
 			}
 
 			if (TbCmd.Text[0] == '#')
@@ -963,9 +942,9 @@ namespace iwm_commandliner2
 						}
 						break;
 
-					// 現在時刻
+					// 現在日時
 					case "#now":
-						TbResult.Text = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+						TbResult.Text = DateTime.Now.ToString(aOp[1]=="" ? "yyyy/MM/dd(ddd) HH:mm:ss" : aOp[1]);
 						break;
 
 					// バージョン
@@ -1062,24 +1041,15 @@ namespace iwm_commandliner2
 		//-------------
 		// Undo／Redo
 		//-------------
-		private bool BoolResultAdd = false;
-
 		private void BtnResultUndo_Click(object sender, EventArgs e)
 		{
-			if (BoolResultAdd == true && TbResult.Text.Length > 0 && TbResult.Text != LResultHistory[LResultHistory.Count - 1])
-			{
-				LResultHistory.Add(TbResult.Text);
-				LResultHistoryPos = LResultHistory.Count - 1;
-				BoolResultAdd = false;
-			}
-
-			--LResultHistoryPos;
-
 			if (LResultHistoryPos >= 0)
 			{
 				TbResult.Text = LResultHistory[LResultHistoryPos];
 				BtnResultRedo.Enabled = true;
 			}
+
+			--LResultHistoryPos;
 
 			if (LResultHistoryPos <= 0)
 			{
@@ -1087,14 +1057,15 @@ namespace iwm_commandliner2
 				BtnResultUndo.Enabled = false;
 			}
 
-			SubTbCmdFocus();
+			TbResult.Enabled = true;
 		}
 
 		private void BtnResultRedo_Click(object sender, EventArgs e)
 		{
+
 			++LResultHistoryPos;
 
-			if (LResultHistoryPos < LResultHistory.Count)
+			if (LResultHistoryPos <= LResultHistory.Count - 1)
 			{
 				TbResult.Text = LResultHistory[LResultHistoryPos];
 				BtnResultUndo.Enabled = true;
@@ -1106,7 +1077,16 @@ namespace iwm_commandliner2
 				BtnResultRedo.Enabled = false;
 			}
 
-			SubTbCmdFocus();
+			TbResult.Enabled = true;
+		}
+
+		private void BtnResultMem_Click(object sender, EventArgs e)
+		{
+			LResultHistory.Add(TbResult.Text);
+			LResultHistoryPos = LResultHistory.Count - 1;
+
+			BtnResultUndo.Enabled = true;
+			BtnResultRedo.Enabled = false;
 		}
 
 		//-----------------
@@ -1218,7 +1198,6 @@ namespace iwm_commandliner2
 			_ = SB.Clear();
 
 			string[] splits = { CRLF };
-
 			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
 			{
 				if (bMatch == rgx.IsMatch(_s1))
@@ -1266,7 +1245,6 @@ namespace iwm_commandliner2
 			_ = SB.Clear();
 
 			string[] splits = { CRLF };
-
 			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
 			{
 				_ = SB.Append(rgx.Replace(_s1, sNew) + CRLF);
@@ -1308,7 +1286,6 @@ namespace iwm_commandliner2
 			_ = SB.Clear();
 
 			string[] splits = { CRLF };
-
 			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
 			{
 				if (_s1.Length > 0)
@@ -1369,7 +1346,6 @@ namespace iwm_commandliner2
 			_ = SB.Clear();
 
 			string[] splits = { CRLF };
-
 			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
 			{
 				_ = SB.Append(RtnErasePos(_s1, " ", iBgnPos, iEndPos) + CRLF);

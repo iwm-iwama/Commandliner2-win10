@@ -21,10 +21,7 @@ namespace iwm_commandliner2
 		//-----------
 		// 大域定数
 		//-----------
-		private const string VERSION =
-			"Ver.20191005_1942 'A-29'" + CRLF +
-			"(C)2018-2019 iwm-iwama" + CRLF
-		;
+		private const string VERSION = "Ver.20191010_2152 'A-29' (C)2018-2019 iwm-iwama";
 
 		private const string CRLF = "\r\n";
 		private const string LN = "----------------------------------------------------------------------" + CRLF;
@@ -57,10 +54,10 @@ namespace iwm_commandliner2
 		};
 
 		// コマンド／出力結果履歴
-		private readonly List<string> LCmdHistory = new List<string>() { "" };// [0] = ""
+		private readonly List<string> LCmdHistory = new List<string>() { "" };// 初期値 ""
 		private int LCmdHistoryPos = 0;
 
-		private readonly List<string> LResultHistory = new List<string>() { "" };// [0] = ""
+		private readonly List<string> LResultHistory = new List<string>() { "" };// 初期値 ""
 		private int LResultHistoryPos = 0;
 
 		// SendMessage関係
@@ -293,6 +290,39 @@ namespace iwm_commandliner2
 			{
 				TbCmd.Paste();
 				TbCmd.Text = TbCmd.Text.Replace(CRLF, " ").Trim();
+			}
+		}
+
+		//------------
+		// CmsCmdSub
+		//------------
+		private void CmsCmdSub_全クリア_Click(object sender, EventArgs e)
+		{
+			TbCmdSub.Text = "";
+		}
+
+		private void CmsCmdSub_全選択_Click(object sender, EventArgs e)
+		{
+			TbCmdSub.SelectAll();
+		}
+
+		private void CmsCmdSub_切り取り_Click(object sender, EventArgs e)
+		{
+			TbCmdSub.Cut();
+		}
+
+		private void CmsCmdSub_コピー_Click(object sender, EventArgs e)
+		{
+			TbCmdSub.Copy();
+		}
+
+		private void CmsCmdSub_貼り付け_Click(object sender, EventArgs e)
+		{
+			IDataObject data = Clipboard.GetDataObject();
+			if (data != null && data.GetDataPresent(DataFormats.Text) == true)
+			{
+				TbCmdSub.Paste();
+				TbCmdSub.Text = TbCmdSub.Text.Replace(CRLF, " ").Trim();
 			}
 		}
 
@@ -703,14 +733,16 @@ namespace iwm_commandliner2
 
 		private void BtnCmdRedo_Click(object sender, EventArgs e)
 		{
-			if (LCmdHistoryPos < LCmdHistory.Count - 1)
+			int i1 = LCmdHistory.Count - 1;
+
+			if (LCmdHistoryPos < i1)
 			{
 				++LCmdHistoryPos;
 				TbCmd.Text = LCmdHistory[LCmdHistoryPos];
 				BtnCmdUndo.Enabled = true;
 			}
 
-			if (LCmdHistoryPos == LCmdHistory.Count - 1)
+			if (LCmdHistoryPos == i1)
 			{
 				BtnCmdRedo.Enabled = false;
 			}
@@ -933,23 +965,23 @@ namespace iwm_commandliner2
 							try
 							{
 								object o1 = dt.Compute(aOp[1], "");
-								TbResult.Text = o1.ToString().TrimEnd('.', '0');
+								TbCmdSub.Text = o1.ToString().TrimEnd('.', '0');
 							}
 							catch
 							{
-								TbResult.Text = "";
+								TbCmdSub.Text = "";
 							}
 						}
 						break;
 
 					// 現在日時
 					case "#now":
-						TbResult.Text = DateTime.Now.ToString(aOp[1]=="" ? "yyyy/MM/dd(ddd) HH:mm:ss" : aOp[1]);
+						TbCmdSub.Text = DateTime.Now.ToString(aOp[1] == "" ? "yyyy/MM/dd(ddd) HH:mm:ss" : aOp[1]);
 						break;
 
 					// バージョン
 					case "#version":
-						TbResult.Text = LN + VERSION + LN;
+						TbCmdSub.Text = VERSION;
 						break;
 
 					default:
@@ -1043,45 +1075,49 @@ namespace iwm_commandliner2
 		//-------------
 		private void BtnResultUndo_Click(object sender, EventArgs e)
 		{
-			if (LResultHistoryPos >= 0)
+			TbResult.Enabled = true;
+
+			BtnResultRedo.Enabled = true;
+
+			if (LResultHistoryPos > 0)
 			{
+				--LResultHistoryPos;
 				TbResult.Text = LResultHistory[LResultHistoryPos];
-				BtnResultRedo.Enabled = true;
 			}
 
-			--LResultHistoryPos;
-
-			if (LResultHistoryPos <= 0)
+			if (LResultHistoryPos == 0)
 			{
-				LResultHistoryPos = 0;
 				BtnResultUndo.Enabled = false;
 			}
-
-			TbResult.Enabled = true;
 		}
 
 		private void BtnResultRedo_Click(object sender, EventArgs e)
 		{
+			TbResult.Enabled = true;
 
-			++LResultHistoryPos;
+			BtnResultUndo.Enabled = true;
 
-			if (LResultHistoryPos <= LResultHistory.Count - 1)
+			int i1 = LResultHistory.Count - 1;
+
+			if (LResultHistoryPos < i1)
 			{
+				++LResultHistoryPos;
 				TbResult.Text = LResultHistory[LResultHistoryPos];
-				BtnResultUndo.Enabled = true;
 			}
 
-			if (LResultHistoryPos >= LResultHistory.Count - 1)
+			if (LResultHistoryPos == i1)
 			{
-				LResultHistoryPos = LResultHistory.Count - 1;
 				BtnResultRedo.Enabled = false;
 			}
-
-			TbResult.Enabled = true;
 		}
 
 		private void BtnResultMem_Click(object sender, EventArgs e)
 		{
+			if (TbResult.Text.Trim().Length == 0)
+			{
+				return;
+			}
+
 			LResultHistory.Add(TbResult.Text);
 			LResultHistoryPos = LResultHistory.Count - 1;
 
@@ -1144,12 +1180,14 @@ namespace iwm_commandliner2
 			string code
 		)
 		{
-			using (SaveFileDialog saveFileDialog1 = new SaveFileDialog{
+			using (SaveFileDialog saveFileDialog1 = new SaveFileDialog
+			{
 				InitialDirectory = ".",
 				FileName = DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".txt",
 				Filter = "All files (*.*)|*.*",
 				FilterIndex = 1
-			})
+			}
+			)
 
 			if (saveFileDialog1.ShowDialog() == DialogResult.OK)
 			{

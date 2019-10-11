@@ -36,6 +36,8 @@
 			this.CmsResult = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.CmsResult_上へ = new System.Windows.Forms.ToolStripMenuItem();
 			this.CmsResult_下へ = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+			this.CmsResult_選択文字列を実行 = new System.Windows.Forms.ToolStripMenuItem();
 			this.CmsResult_L2 = new System.Windows.Forms.ToolStripSeparator();
 			this.CmsResult_全クリア = new System.Windows.Forms.ToolStripMenuItem();
 			this.CmsResult_全選択 = new System.Windows.Forms.ToolStripMenuItem();
@@ -165,6 +167,8 @@
 			this.CmsResult.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.CmsResult_上へ,
             this.CmsResult_下へ,
+            this.toolStripMenuItem1,
+            this.CmsResult_選択文字列を実行,
             this.CmsResult_L2,
             this.CmsResult_全クリア,
             this.CmsResult_全選択,
@@ -175,7 +179,7 @@
             this.CmsResult_L4,
             this.CmsResult_名前を付けて保存});
 			this.CmsResult.Name = "CmsResult";
-			this.CmsResult.Size = new System.Drawing.Size(173, 198);
+			this.CmsResult.Size = new System.Drawing.Size(173, 226);
 			// 
 			// CmsResult_上へ
 			// 
@@ -192,6 +196,20 @@
 			this.CmsResult_下へ.Size = new System.Drawing.Size(172, 22);
 			this.CmsResult_下へ.Text = "▼";
 			this.CmsResult_下へ.Click += new System.EventHandler(this.CmsResult_下へ_Click);
+			// 
+			// toolStripMenuItem1
+			// 
+			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(169, 6);
+			// 
+			// CmsResult_選択文字列を実行
+			// 
+			this.CmsResult_選択文字列を実行.BackColor = System.Drawing.SystemColors.Control;
+			this.CmsResult_選択文字列を実行.ForeColor = System.Drawing.Color.Crimson;
+			this.CmsResult_選択文字列を実行.Name = "CmsResult_選択文字列を実行";
+			this.CmsResult_選択文字列を実行.Size = new System.Drawing.Size(172, 22);
+			this.CmsResult_選択文字列を実行.Text = "選択文字列を実行";
+			this.CmsResult_選択文字列を実行.Click += new System.EventHandler(this.CmsResult_選択文字列を実行_Click);
 			// 
 			// CmsResult_L2
 			// 
@@ -248,6 +266,7 @@
 			this.CmsResult_名前を付けて保存.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.CmsResult_名前を付けて保存_ShiftJIS,
             this.CmsResult_名前を付けて保存_UTF8N});
+			this.CmsResult_名前を付けて保存.ForeColor = System.Drawing.Color.RoyalBlue;
 			this.CmsResult_名前を付けて保存.Name = "CmsResult_名前を付けて保存";
 			this.CmsResult_名前を付けて保存.Size = new System.Drawing.Size(172, 22);
 			this.CmsResult_名前を付けて保存.Text = "名前を付けて保存";
@@ -677,6 +696,7 @@
 			this.TbCmdSub.TabIndex = 2;
 			this.TbCmdSub.TabStop = false;
 			this.TbCmdSub.WordWrap = false;
+			this.TbCmdSub.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TbCmdSub_KeyUp);
 			// 
 			// CmsCmdSub
 			// 
@@ -830,6 +850,8 @@
 		private System.Windows.Forms.ToolStripMenuItem CmsCmdSub_切り取り;
 		private System.Windows.Forms.ToolStripMenuItem CmsCmdSub_コピー;
 		private System.Windows.Forms.ToolStripMenuItem CmsCmdSub_貼り付け;
+		private System.Windows.Forms.ToolStripMenuItem CmsResult_選択文字列を実行;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
 	}
 }
 

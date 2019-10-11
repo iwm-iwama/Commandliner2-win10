@@ -21,7 +21,7 @@ namespace iwm_commandliner2
 		//-----------
 		// 大域定数
 		//-----------
-		private const string VERSION = "Ver.20191010_2152 'A-29' (C)2018-2019 iwm-iwama";
+		private const string VERSION = "Ver.20191011_1040 'A-29' (C)2018-2019 iwm-iwama";
 
 		private const string CRLF = "\r\n";
 		private const string LN = "----------------------------------------------------------------------" + CRLF;
@@ -290,6 +290,26 @@ namespace iwm_commandliner2
 			{
 				TbCmd.Paste();
 				TbCmd.Text = TbCmd.Text.Replace(CRLF, " ").Trim();
+			}
+		}
+
+		//-----------
+		// TbCmdSub
+		//-----------
+		private void TbCmdSub_KeyUp(object sender, KeyEventArgs e)
+		{
+			switch (e.KeyCode)
+			{
+				case Keys.Up:
+					TbCmdSub.Select(0, 0);
+					break;
+
+				case Keys.Down:
+					TbCmdSub.Select(TbCmdSub.TextLength, 0);
+					break;
+
+				default:
+					break;
 			}
 		}
 
@@ -786,7 +806,7 @@ namespace iwm_commandliner2
 				{
 				}
 			}
-  }
+		}
 
 		//-------
 		// 実行
@@ -964,8 +984,7 @@ namespace iwm_commandliner2
 						{
 							try
 							{
-								object o1 = dt.Compute(aOp[1], "");
-								TbCmdSub.Text = o1.ToString().TrimEnd('.', '0');
+								TbCmdSub.Text = dt.Compute(aOp[1], "").ToString().TrimEnd('.', '0');
 							}
 							catch
 							{
@@ -1029,6 +1048,19 @@ namespace iwm_commandliner2
 		{
 			TbResult.SelectionStart = TbResult.TextLength;
 			TbResult.ScrollToCaret();
+		}
+
+		private void CmsResult_選択文字列を実行_Click(object sender, EventArgs e)
+		{
+			string cmd = TbResult.SelectedText.Trim();
+			try
+			{
+				_ = Process.Start(cmd);
+			}
+			catch
+			{
+				_ = MessageBox.Show($"[実行できない文字列]{CRLF}\"{cmd}\"");
+			}
 		}
 
 		private void CmsResult_全クリア_Click(object sender, EventArgs e)

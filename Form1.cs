@@ -21,7 +21,7 @@ namespace iwm_commandliner2
 		//-----------
 		// 大域定数
 		//-----------
-		private const string VERSION = "Ver.20191011_1040 'A-29' (C)2018-2019 iwm-iwama";
+		private const string VERSION = "Ver.20191025_2055 'A-29' (C)2018-2019 iwm-iwama";
 
 		private const string CRLF = "\r\n";
 		private const string LN = "----------------------------------------------------------------------" + CRLF;
@@ -49,6 +49,8 @@ namespace iwm_commandliner2
 			{ "#x2",       "行番号付与" },
 			{ "#x3",       "行数カウント" },
 			{ "#calc",     "計算機 (例) #calc \"(1.5+2.5)/3\"" },
+			{ "#ms-calc",  "Windows 電卓" },
+			{ "#ms-edit",  "Windows メモ帳" },
 			{ "#now",      "現在日時" },
 			{ "#version",  "バージョン" }
 		};
@@ -991,6 +993,16 @@ namespace iwm_commandliner2
 								TbCmdSub.Text = "";
 							}
 						}
+						break;
+
+					// Windows 電卓
+					case "#ms-calc":
+						_ = Process.Start("calc.exe");
+						break;
+
+					// Windows メモ帳
+					case "#ms-edit":
+						_ = Process.Start("notepad.exe");
 						break;
 
 					// 現在日時

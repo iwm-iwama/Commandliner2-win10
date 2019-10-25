@@ -205,7 +205,7 @@
 			// CmsResult_選択文字列を実行
 			// 
 			this.CmsResult_選択文字列を実行.BackColor = System.Drawing.SystemColors.Control;
-			this.CmsResult_選択文字列を実行.ForeColor = System.Drawing.Color.Crimson;
+			this.CmsResult_選択文字列を実行.ForeColor = System.Drawing.SystemColors.ControlText;
 			this.CmsResult_選択文字列を実行.Name = "CmsResult_選択文字列を実行";
 			this.CmsResult_選択文字列を実行.Size = new System.Drawing.Size(172, 22);
 			this.CmsResult_選択文字列を実行.Text = "選択文字列を実行";
@@ -266,7 +266,7 @@
 			this.CmsResult_名前を付けて保存.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.CmsResult_名前を付けて保存_ShiftJIS,
             this.CmsResult_名前を付けて保存_UTF8N});
-			this.CmsResult_名前を付けて保存.ForeColor = System.Drawing.Color.RoyalBlue;
+			this.CmsResult_名前を付けて保存.ForeColor = System.Drawing.SystemColors.ControlText;
 			this.CmsResult_名前を付けて保存.Name = "CmsResult_名前を付けて保存";
 			this.CmsResult_名前を付けて保存.Size = new System.Drawing.Size(172, 22);
 			this.CmsResult_名前を付けて保存.Text = "名前を付けて保存";
@@ -416,7 +416,7 @@
 			// BtnCmdExec
 			// 
 			this.BtnCmdExec.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.BtnCmdExec.BackColor = System.Drawing.Color.DimGray;
+			this.BtnCmdExec.BackColor = System.Drawing.Color.RoyalBlue;
 			this.BtnCmdExec.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
 			this.BtnCmdExec.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.BtnCmdExec.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
@@ -435,7 +435,7 @@
 			// BtnResultMem
 			// 
 			this.BtnResultMem.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.BtnResultMem.BackColor = System.Drawing.Color.DimGray;
+			this.BtnResultMem.BackColor = System.Drawing.Color.Crimson;
 			this.BtnResultMem.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.BtnResultMem.Font = new System.Drawing.Font("Yu Gothic UI", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.BtnResultMem.ForeColor = System.Drawing.Color.White;
@@ -688,7 +688,7 @@
 			this.TbCmdSub.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.TbCmdSub.ContextMenuStrip = this.CmsCmdSub;
 			this.TbCmdSub.Font = new System.Drawing.Font("ＭＳ ゴシック", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-			this.TbCmdSub.ForeColor = System.Drawing.Color.Cyan;
+			this.TbCmdSub.ForeColor = System.Drawing.Color.WhiteSmoke;
 			this.TbCmdSub.Location = new System.Drawing.Point(10, 68);
 			this.TbCmdSub.Margin = new System.Windows.Forms.Padding(0);
 			this.TbCmdSub.Name = "TbCmdSub";

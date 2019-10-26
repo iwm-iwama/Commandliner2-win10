@@ -408,7 +408,7 @@
 			this.BtnTbResultWrite.Size = new System.Drawing.Size(22, 22);
 			this.BtnTbResultWrite.TabIndex = 18;
 			this.BtnTbResultWrite.TabStop = false;
-			this.BtnTbResultWrite.Text = "●";
+			this.BtnTbResultWrite.Text = "★";
 			this.ToolTip1.SetToolTip(this.BtnTbResultWrite, "画面ロック解除");
 			this.BtnTbResultWrite.UseVisualStyleBackColor = false;
 			this.BtnTbResultWrite.Click += new System.EventHandler(this.BtnTbResultWrite_Click);
@@ -427,7 +427,7 @@
 			this.BtnCmdExec.Size = new System.Drawing.Size(22, 22);
 			this.BtnCmdExec.TabIndex = 10;
 			this.BtnCmdExec.TabStop = false;
-			this.BtnCmdExec.Text = "■";
+			this.BtnCmdExec.Text = "▶";
 			this.ToolTip1.SetToolTip(this.BtnCmdExec, "実行");
 			this.BtnCmdExec.UseVisualStyleBackColor = false;
 			this.BtnCmdExec.Click += new System.EventHandler(this.BtnCmdExec_Click);
@@ -445,7 +445,7 @@
 			this.BtnResultMem.Size = new System.Drawing.Size(25, 24);
 			this.BtnResultMem.TabIndex = 15;
 			this.BtnResultMem.TabStop = false;
-			this.BtnResultMem.Text = "◆";
+			this.BtnResultMem.Text = "●";
 			this.ToolTip1.SetToolTip(this.BtnResultMem, "結果を記憶");
 			this.BtnResultMem.UseVisualStyleBackColor = false;
 			this.BtnResultMem.Click += new System.EventHandler(this.BtnResultMem_Click);

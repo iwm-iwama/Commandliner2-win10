@@ -21,10 +21,10 @@ namespace iwm_commandliner2
 		//-----------
 		// 大域定数
 		//-----------
-		private const string VERSION = "Ver.20191026_1126 'A-29' (C)2018-2019 iwm-iwama";
+		private const string VERSION = "Ver.20200208 'A-29' (C)2018-2020 iwm-iwama";
 
-		private const string CRLF = "\r\n";
-		private const string LN = "----------------------------------------------------------------------" + CRLF;
+		private const string NL = "\r\n";
+		private const string LN = "----------------------------------------------------------------------" + NL;
 
 		//-----------
 		// 大域変数
@@ -171,7 +171,7 @@ namespace iwm_commandliner2
 			// [Ctrl+V] のとき
 			if (e.KeyData == (Keys.Control | Keys.V))
 			{
-				TbCmd.Text = TbCmd.Text.Replace(CRLF, " ").Trim();
+				TbCmd.Text = TbCmd.Text.Replace(NL, " ").Trim();
 			}
 
 			int iLen = TbCmd.TextLength;
@@ -287,12 +287,7 @@ namespace iwm_commandliner2
 
 		private void CmsCmd_貼り付け_Click(object sender, EventArgs e)
 		{
-			IDataObject data = Clipboard.GetDataObject();
-			if (data != null && data.GetDataPresent(DataFormats.Text) == true)
-			{
-				TbCmd.Paste();
-				TbCmd.Text = TbCmd.Text.Replace(CRLF, " ").Trim();
-			}
+			TbCmd.Paste();
 		}
 
 		//-----------
@@ -340,12 +335,7 @@ namespace iwm_commandliner2
 
 		private void CmsCmdSub_貼り付け_Click(object sender, EventArgs e)
 		{
-			IDataObject data = Clipboard.GetDataObject();
-			if (data != null && data.GetDataPresent(DataFormats.Text) == true)
-			{
-				TbCmdSub.Paste();
-				TbCmdSub.Text = TbCmdSub.Text.Replace(CRLF, " ").Trim();
-			}
+			TbCmdSub.Paste();
 		}
 
 		//----------
@@ -699,6 +689,13 @@ namespace iwm_commandliner2
 					TbResult.SelectionStart = TbResult.TextLength;
 					break;
 
+				case Keys.V:
+					if (e.Control == true)
+					{
+						CmsResult_貼り付け_Click(sender, e);
+					}
+					break;
+
 				default:
 					TbResult_MouseUp(sender, null);
 					break;
@@ -717,7 +714,7 @@ namespace iwm_commandliner2
 			int iRow = 0;
 			int iCnt = 0;
 
-			string[] splits = { CRLF };
+			string[] splits = { NL };
 			foreach (string _s1 in TbResult.SelectedText.Split(splits, StringSplitOptions.None))
 			{
 				++iNL;
@@ -817,7 +814,7 @@ namespace iwm_commandliner2
 		{
 			TbResult.Enabled = false;
 
-			TbCmd.Text = TbCmd.Text.Replace(CRLF, null).Trim();
+			TbCmd.Text = TbCmd.Text.Replace(NL, null).Trim();
 
 			if (TbCmd.Text.Length == 0)
 			{
@@ -937,7 +934,7 @@ namespace iwm_commandliner2
 								// 2行目～
 								if (bLines)
 								{
-									_ = SB.Append(CRLF + _s2);
+									_ = SB.Append(NL + _s2);
 								}
 								// 1行目
 								else
@@ -957,7 +954,7 @@ namespace iwm_commandliner2
 						_ = SB.Clear();
 						foreach (string _s1 in TbResult.Text.Split('\n'))
 						{
-							_ = SB.Append(string.Format("{0:D8}\t{1}{2}", ++cnt, _s1.TrimEnd(), CRLF));
+							_ = SB.Append(string.Format("{0:D8}\t{1}{2}", ++cnt, _s1.TrimEnd(), NL));
 						}
 						TbResult.Text = SB.ToString();
 						SubTbResultFocus();
@@ -977,7 +974,7 @@ namespace iwm_commandliner2
 							}
 						}
 						SubTbResultFocus();
-						_ = SendMessage(TbResult.Handle, EM_REPLACESEL, 1, string.Format("{3}{2}全行数　 : {0}{3}有効行数 : {1}{3}{2}", cntAll, cntActive, LN, CRLF));
+						_ = SendMessage(TbResult.Handle, EM_REPLACESEL, 1, string.Format("{3}{2}全行数　 : {0}{3}有効行数 : {1}{3}{2}", cntAll, cntActive, LN, NL));
 						break;
 
 					// 計算機
@@ -1039,7 +1036,7 @@ namespace iwm_commandliner2
 
 		private void EventDataReceived(object sender, DataReceivedEventArgs e)
 		{
-			_ = SendMessage(TbResult.Handle, EM_REPLACESEL, 1, e.Data + CRLF);
+			_ = SendMessage(TbResult.Handle, EM_REPLACESEL, 1, e.Data + NL);
 		}
 
 		private void ProcessDataReceived(object sender, DataReceivedEventArgs e)
@@ -1071,7 +1068,7 @@ namespace iwm_commandliner2
 			}
 			catch
 			{
-				_ = MessageBox.Show($"[実行できない文字列]{CRLF}\"{cmd}\"");
+				_ = MessageBox.Show($"[実行できない文字列]{NL}\"{cmd}\"");
 			}
 		}
 
@@ -1097,11 +1094,7 @@ namespace iwm_commandliner2
 
 		private void CmsResult_貼り付け_Click(object sender, EventArgs e)
 		{
-			IDataObject data = Clipboard.GetDataObject();
-			if (data != null && data.GetDataPresent(DataFormats.Text) == true)
-			{
-				TbResult.Paste();
-			}
+			_ = SendMessage(TbResult.Handle, EM_REPLACESEL, 1, Regex.Replace(Clipboard.GetText(), "\r*\n", NL));
 		}
 
 		private void CmsResult_名前を付けて保存_ShiftJIS_Click(object sender, EventArgs e)
@@ -1279,12 +1272,12 @@ namespace iwm_commandliner2
 
 			_ = SB.Clear();
 
-			string[] splits = { CRLF };
+			string[] splits = { NL };
 			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
 			{
 				if (bMatch == rgx.IsMatch(_s1))
 				{
-					_ = SB.Append(_s1 + CRLF);
+					_ = SB.Append(_s1 + NL);
 				}
 			}
 
@@ -1307,7 +1300,7 @@ namespace iwm_commandliner2
 			}
 
 			// 特殊文字を置換
-			sNew = sNew.Replace("\\n", CRLF);
+			sNew = sNew.Replace("\\n", NL);
 			sNew = sNew.Replace("\\t", "\t");
 			sNew = sNew.Replace("\\\\", "\\");
 			sNew = sNew.Replace("\\\"", "\"");
@@ -1326,10 +1319,10 @@ namespace iwm_commandliner2
 
 			_ = SB.Clear();
 
-			string[] splits = { CRLF };
+			string[] splits = { NL };
 			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
 			{
-				_ = SB.Append(rgx.Replace(_s1, sNew) + CRLF);
+				_ = SB.Append(rgx.Replace(_s1, sNew) + NL);
 			}
 
 			tb.Text = SB.ToString();
@@ -1367,7 +1360,7 @@ namespace iwm_commandliner2
 
 			_ = SB.Clear();
 
-			string[] splits = { CRLF };
+			string[] splits = { NL };
 			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
 			{
 				if (_s1.Length > 0)
@@ -1380,7 +1373,7 @@ namespace iwm_commandliner2
 						_s2 = _s2.Replace("[" + _i1.ToString() + "]", a1[_i1]);
 
 						// 特殊文字を置換
-						_s2 = _s2.Replace("\\n", CRLF);
+						_s2 = _s2.Replace("\\n", NL);
 						_s2 = _s2.Replace("\\t", "\t");
 						_s2 = _s2.Replace("\\\\", "\\");
 						_s2 = _s2.Replace("\\\"", "\"");
@@ -1388,7 +1381,7 @@ namespace iwm_commandliner2
 					}
 
 					// 該当なしの変換子を削除
-					_ = SB.Append(rgx1.Replace(_s2, "") + CRLF);
+					_ = SB.Append(rgx1.Replace(_s2, "") + NL);
 				}
 			}
 
@@ -1427,10 +1420,10 @@ namespace iwm_commandliner2
 
 			_ = SB.Clear();
 
-			string[] splits = { CRLF };
+			string[] splits = { NL };
 			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
 			{
-				_ = SB.Append(RtnErasePos(_s1, " ", iBgnPos, iEndPos) + CRLF);
+				_ = SB.Append(RtnErasePos(_s1, " ", iBgnPos, iEndPos) + NL);
 			}
 
 			tb.Text = SB.ToString();
@@ -1531,7 +1524,7 @@ namespace iwm_commandliner2
 
 			foreach (string _s1 in l1)
 			{
-				_ = SB.Append(_s1 + CRLF);
+				_ = SB.Append(_s1 + NL);
 			}
 
 			tb.Text = SB.ToString();

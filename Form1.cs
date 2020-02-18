@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 //using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+//using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 //using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.VisualBasic;// (要)参照に追加
+using Microsoft.VisualBasic; // プロジェクト～参照の追加
 
 namespace iwm_commandliner2
 {
@@ -21,10 +23,38 @@ namespace iwm_commandliner2
 		//-----------
 		// 大域定数
 		//-----------
-		private const string VERSION = "Ver.20200208 'A-29' (C)2018-2020 iwm-iwama";
+		private const string VERSION = "Ver.20200217_2300 'A-29' (C)2018-2020 iwm-iwama";
 
 		private const string NL = "\r\n";
-		private const string LN = "----------------------------------------------------------------------" + NL;
+		private readonly string[] SPLITS = { NL };
+
+		private readonly string[] GblASTextCode = { "Shift_JIS", "UTF-8" };
+
+		private readonly object[,] GblAOCmd = {
+			// [コマンド]   [説明]                                              [引数]
+			{ "#clear",     "入出力クリア",                                       0 },
+			{ "#grep",      "検索        #grep \"2018\"",                         1 },
+			{ "#except",    "不一致検索  #except \"2018\"",                       1 },
+			{ "#replace",   "置換        #replace \"2018/\" \"18/\"",             2 },
+			{ "#split",     "分割        #split \"\\t\" \"[0],[1]\"",             2 },
+			{ "#toUpper",   "大文字に変換",                                       0 },
+			{ "#toLower",   "小文字に変換",                                       0 },
+			{ "#toWide",    "全角に変換",                                         0 },
+			{ "#toZenNum",  "全角に変換(数字のみ)",                               0 },
+			{ "#toZenKana", "全角に変換(カナのみ)",                               0 },
+			{ "#toNarrow",  "半角に変換",                                         0 },
+			{ "#toHanNum",  "半角に変換(数字のみ)",                               0 },
+			{ "#toHanKana", "半角に変換(カナのみ)",                               0 },
+			{ "#erase",     "消去 \"開始位置\" \"文字長\"  #erase \"0\" \"5\"",   2 },
+			{ "#sort",      "ソート",                                             0 },
+			{ "#uniq",      "ソート後、重複行を消去",                             0 },
+			{ "#rmBlankLn", "空白行削除",                                         0 },
+			{ "#addLnNum",  "行番号付与",                                         0 },
+			{ "#wget",      "ファイル取得  #wget \"http://.../index.html\"",      1 },
+			{ "#calc",      "計算機        #calc \"45 * pi / 180\"",              1 },
+			{ "#now",       "現在日時",                                           0 },
+			{ "#version",   "バージョン",                                         0 }
+		};
 
 		//-----------
 		// 大域変数
@@ -32,53 +62,32 @@ namespace iwm_commandliner2
 		// CurDir
 		private string CurDir = "";
 
-		// 編集用コマンド
-		private readonly string[,] ACmd = {
-			{ "#grep",     "検索       (例) #grep \"2018\"" },
-			{ "#except",   "不一致検索 (例) #except \"2018\"" },
-			{ "#replace",  "置換       (例) #replace \"2018/\" \"18/\"" },
-			{ "#split",    "分割       (例) #split \"\\t\" \"[0],[1]\"" },
-			{ "#toUpper",  "大文字に変換" },
-			{ "#toLower",  "小文字に変換" },
-			{ "#toWide",   "全角に変換" },
-			{ "#toNarrow", "半角に変換" },
-			{ "#erase",    "消去 \"開始位置\" \"終了位置\" (例) #erase \"0\" \"5\"" },
-			{ "#sort",     "ソート" },
-			{ "#uniq",     "ソート後、重複行を消去" },
-			{ "#x1",       "空白行削除" },
-			{ "#x2",       "行番号付与" },
-			{ "#x3",       "行数カウント" },
-			{ "#calc",     "計算機 (例) #calc \"(1.5+2.5)/3\"" },
-			{ "#ms-calc",  "Windows 電卓" },
-			{ "#ms-edit",  "Windows メモ帳" },
-			{ "#now",      "現在日時" },
-			{ "#version",  "バージョン" }
-		};
+		// 文字列
+		private readonly StringBuilder SB = new StringBuilder();
 
-		// コマンド／出力結果履歴
-		private readonly List<string> LCmdHistory = new List<string>() { "" };// 初期値 ""
+		// コマンド／出力履歴
+		private readonly List<string> LCmdHistory = new List<string>() { "" }; // 初期値 ""
 		private int LCmdHistoryPos = 0;
 
-		private readonly List<string> LResultHistory = new List<string>() { "" };// 初期値 ""
+		private readonly List<string> LResultHistory = new List<string>() { "" }; // 初期値 ""
 		private int LResultHistoryPos = 0;
-
-		// SendMessage関係
-		[DllImport("User32.dll")]
-		private static extern int SendMessage(IntPtr hWnd, int uMsg, int wParam, string lParam);
 
 		private delegate void MyEventHandler(object sender, DataReceivedEventArgs e);
 		private event MyEventHandler MyEvent = null;
 
 		public Process P1 { get; set; } = null;
 
+		internal static class NativeMethods
+		{
+			[DllImport("User32.dll", CharSet = CharSet.Unicode)]
+			internal static extern int SendMessage(IntPtr hWnd, int uMsg, int wParam, string lParam);
+		}
+
 		private const int EM_REPLACESEL = 0x00C2;
 
-		// 文字列
-		private readonly StringBuilder SB = new StringBuilder();
-
-		//--------
-		// Form1
-		//--------
+		//-------
+		// Form
+		//-------
 		public Form1()
 		{
 			InitializeComponent();
@@ -106,10 +115,17 @@ namespace iwm_commandliner2
 			BtnResultRedo.Enabled = false;
 
 			// DgvEdit 表示
-			for (int _i1 = 0; _i1 < ACmd.GetLength(0); _i1++)
+			for (int _i1 = 0; _i1 < GblAOCmd.GetLength(0); _i1++)
 			{
-				_ = DgvEdit.Rows.Add(ACmd[_i1, 0], ACmd[_i1, 1]);
+				_ = DgvEdit.Rows.Add(GblAOCmd[_i1, 0], GblAOCmd[_i1, 1]);
 			}
+
+			// Encode
+			foreach (string _s1 in GblASTextCode)
+			{
+				_ = CbTextCode.Items.Add(_s1);
+			}
+			CbTextCode.Text = GblASTextCode[0];
 
 			// LblResult
 			TbResult_MouseUp(sender, null);
@@ -118,7 +134,7 @@ namespace iwm_commandliner2
 			NumericUpDown1.Value = (int)Math.Round(TbResult.Font.Size);
 
 			// 初フォーカス
-			SubTbCmdFocus();
+			SubTbCmdFocus(TbCmd.TextLength);
 		}
 
 		//-----------
@@ -158,13 +174,13 @@ namespace iwm_commandliner2
 			CbDgvCmd.Checked = false;
 			CbDgvCmd_Click(sender, e);
 
-			SubTbCmdFocus();
-
 			TbResult.Enabled = true;
 		}
 
 		private void TbCmd_KeyUp(object sender, KeyEventArgs e)
 		{
+			TbCmd_MouseClick(sender, null);
+
 			// Fontを戻す
 			TbCmd.Font = new Font(TbCmd.Font.Name, TbCmd.Font.Size);
 
@@ -179,9 +195,13 @@ namespace iwm_commandliner2
 
 			switch (e.KeyCode)
 			{
+				case Keys.Escape:
+					TbResult.Focus();
+					break;
+
 				case Keys.Enter:
 					SubTbCmdExec(sender, null);
-					_ = BtnCmdExec.Focus();
+					SubTbCmdFocus(TbCmd.TextLength);
 					break;
 
 				case Keys.Up:
@@ -202,7 +222,7 @@ namespace iwm_commandliner2
 					break;
 
 				case Keys.PageUp:
-					i1 = TbCmd.SelectionStart - 10;
+					i1 = TbCmd.SelectionStart - 20;
 					if (i1 < 0)
 					{
 						i1 = 0;
@@ -211,15 +231,12 @@ namespace iwm_commandliner2
 					break;
 
 				case Keys.PageDown:
-					i1 = TbCmd.SelectionStart + 10;
+					i1 = TbCmd.SelectionStart + 20;
 					if (i1 > iLen)
 					{
 						i1 = iLen;
 					}
 					TbCmd.Select(i1, 0);
-					break;
-
-				default:
 					break;
 			}
 
@@ -238,9 +255,28 @@ namespace iwm_commandliner2
 			}
 		}
 
+		private void TbCmd_MouseClick(object sender, MouseEventArgs e)
+		{
+			TbResult.Enabled = true;
+		}
+
 		private void TbCmd_MouseHover(object sender, EventArgs e)
 		{
-			ToolTip1.SetToolTip(TbCmd, Regex.Replace(TbCmd.Text, @"(?<=\G.{80})(?!$)", Environment.NewLine));
+			ToolTip1.SetToolTip(TbCmd, Regex.Replace(TbCmd.Text, @"(?<=\G.{80})(?!$)", NL));
+		}
+
+		private void TbCmd_DragDrop(object sender, DragEventArgs e)
+		{
+			string[] a1 = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+
+			int i1 = TbCmd.SelectionStart;
+			if (i1 == TbCmd.TextLength)
+			{
+				TbCmd.Text += " ";
+				++i1;
+			}
+
+			TbCmd.Text = TbCmd.Text.Substring(0, i1) + string.Join(" ", a1) + TbCmd.Text.Substring(i1);
 		}
 
 		private void TbCmd_DragEnter(object sender, DragEventArgs e)
@@ -248,41 +284,33 @@ namespace iwm_commandliner2
 			e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
 		}
 
-		private void TbCmd_DragDrop(object sender, DragEventArgs e)
-		{
-			int i1 = TbCmd.SelectionStart;
-			string s1 = "";
-
-			string[] a1 = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-			foreach (string _s1 in a1)
-			{
-				s1 += " " + _s1;
-			}
-
-			TbCmd.Text = TbCmd.Text.Substring(0, i1).Trim() + s1 + " " + TbCmd.Text.Substring(i1).Trim();
-		}
-
 		//---------
 		// CmsCmd
 		//---------
+		private void CmsCmd_実行_Click(object sender, EventArgs e)
+		{
+			SubTbCmdExec(sender, e);
+		}
+
 		private void CmsCmd_全クリア_Click(object sender, EventArgs e)
 		{
 			TbCmd.Text = "";
 		}
 
-		private void CmsCmd_全選択_Click(object sender, EventArgs e)
+		private void CmsCmd_全コピー_Click(object sender, EventArgs e)
 		{
 			TbCmd.SelectAll();
-		}
-
-		private void CmsCmd_切り取り_Click(object sender, EventArgs e)
-		{
-			TbCmd.Cut();
+			TbCmd.Copy();
 		}
 
 		private void CmsCmd_コピー_Click(object sender, EventArgs e)
 		{
 			TbCmd.Copy();
+		}
+
+		private void CmsCmd_切り取り_Click(object sender, EventArgs e)
+		{
+			TbCmd.Cut();
 		}
 
 		private void CmsCmd_貼り付け_Click(object sender, EventArgs e)
@@ -293,10 +321,19 @@ namespace iwm_commandliner2
 		//-----------
 		// TbCmdSub
 		//-----------
+		private void TbCmdSub_Enter(object sender, EventArgs e)
+		{
+			TbResult.Enabled = true;
+		}
+
 		private void TbCmdSub_KeyUp(object sender, KeyEventArgs e)
 		{
 			switch (e.KeyCode)
 			{
+				case Keys.Escape:
+					SubTbCmdFocus(TbCmd.TextLength);
+					break;
+
 				case Keys.Up:
 					TbCmdSub.Select(0, 0);
 					break;
@@ -304,10 +341,14 @@ namespace iwm_commandliner2
 				case Keys.Down:
 					TbCmdSub.Select(TbCmdSub.TextLength, 0);
 					break;
-
-				default:
-					break;
 			}
+		}
+
+		private void SubCmdSubAddText(string str)
+		{
+			TbCmdSub.Text += str + NL;
+			TbCmdSub.SelectionStart = TbCmdSub.TextLength;
+			TbCmdSub.ScrollToCaret();
 		}
 
 		//------------
@@ -318,19 +359,20 @@ namespace iwm_commandliner2
 			TbCmdSub.Text = "";
 		}
 
-		private void CmsCmdSub_全選択_Click(object sender, EventArgs e)
+		private void CmsCmdSub_全コピー_Click(object sender, EventArgs e)
 		{
 			TbCmdSub.SelectAll();
-		}
-
-		private void CmsCmdSub_切り取り_Click(object sender, EventArgs e)
-		{
-			TbCmdSub.Cut();
+			TbCmdSub.Copy();
 		}
 
 		private void CmsCmdSub_コピー_Click(object sender, EventArgs e)
 		{
 			TbCmdSub.Copy();
+		}
+
+		private void CmsCmdSub_切り取り_Click(object sender, EventArgs e)
+		{
+			TbCmdSub.Cut();
 		}
 
 		private void CmsCmdSub_貼り付け_Click(object sender, EventArgs e)
@@ -348,7 +390,7 @@ namespace iwm_commandliner2
 				DgvEdit.Enabled = true;
 				DgvEdit.ScrollBars = ScrollBars.Vertical;
 				DgvEdit.Width = 374;
-				DgvEdit.Height = 350;
+				DgvEdit.Height = 337;
 			}
 			else
 			{
@@ -367,9 +409,26 @@ namespace iwm_commandliner2
 		private void DgvEdit_Click(object sender, EventArgs e)
 		{
 			TbCmd.Text = DgvEdit[0, DgvEdit.CurrentRow.Index].Value.ToString();
+
+			int iPos = 0;
+
+			for (int _i1 = 0; _i1 < GblAOCmd.Length; _i1++)
+			{
+				if (GblAOCmd[_i1, 0].ToString() == TbCmd.Text)
+				{
+					int _i2 = (int)GblAOCmd[_i1, 2];
+					for (int _i3 = 0; _i3 < _i2; _i3++)
+					{
+						TbCmd.Text += " \"\"";
+					}
+					iPos = _i2 - 1;
+					break;
+				}
+			}
+			SubTbCmdFocus(TbCmd.TextLength - 1 - (iPos * 3));
+
 			CbDgvEdit.Checked = false;
 			CbDgvEdit_Click(sender, e);
-			SubTbCmdFocus();
 		}
 
 		private int DgvEditRow = 0;
@@ -381,17 +440,7 @@ namespace iwm_commandliner2
 			switch (e.KeyCode)
 			{
 				case Keys.Enter:
-					try
-					{
-						TbCmd.Text = DgvEdit[0, DgvEditRow].Value.ToString();
-					}
-					catch
-					{
-						TbCmd.Text = "";
-					}
-					break;
-
-				default:
+					SubCmdSubAddText("[Click]または[Space]キーで選択");
 					break;
 			}
 		}
@@ -402,8 +451,8 @@ namespace iwm_commandliner2
 
 			switch (e.KeyCode)
 			{
-				case Keys.Enter:
-					SubTbCmdFocus();
+				case Keys.Space:
+					DgvEdit_Click(sender, e);
 					break;
 
 				case Keys.Up:
@@ -421,31 +470,11 @@ namespace iwm_commandliner2
 					break;
 
 				case Keys.Left:
-					if (DgvEditRow == 0)
-					{
-						DgvEditRow = i1;
-						break;
-					}
-
-					if ((DgvEditRow -= 3) < 0)
-					{
-						DgvEditRow = 0;
-					}
-
+					DgvEditRow = DgvEditRow == 0 ? i1 : 0;
 					break;
 
 				case Keys.Right:
-					if (DgvEditRow == i1)
-					{
-						DgvEditRow = 0;
-						break;
-					}
-
-					if ((DgvEditRow += 3) > i1)
-					{
-						DgvEditRow = i1;
-					}
-
+					DgvEditRow = DgvEditRow == i1 ? 0 : i1;
 					break;
 
 				case Keys.PageUp:
@@ -454,9 +483,6 @@ namespace iwm_commandliner2
 
 				case Keys.PageDown:
 					DgvEditRow = DgvEditRow == i1 ? 0 : DgvEdit.CurrentRow.Index;
-					break;
-
-				default:
 					break;
 			}
 
@@ -473,7 +499,7 @@ namespace iwm_commandliner2
 				DgvCmd.Enabled = true;
 				DgvCmd.ScrollBars = ScrollBars.Both;
 				DgvCmd.Width = 291;
-				DgvCmd.Height = 350;
+				DgvCmd.Height = 337;
 				TbDgvCmdSearch.Visible = true;
 			}
 			else
@@ -498,7 +524,7 @@ namespace iwm_commandliner2
 			CbDgvCmd.Checked = false;
 			CbDgvCmd_Click(sender, e);
 
-			SubTbCmdFocus();
+			SubTbCmdFocus(TbCmd.TextLength);
 		}
 
 		private int DgvCmdCurrentRow = 0;
@@ -510,20 +536,7 @@ namespace iwm_commandliner2
 			switch (e.KeyCode)
 			{
 				case Keys.Enter:
-					TbCmd.Text = DgvCmd[0, DgvCmd.CurrentCell.RowIndex].Value.ToString();
-
-					try
-					{
-						DgvCmd.CurrentCell = DgvCmd[0, DgvCmdCurrentRow - 1];
-					}
-					catch
-					{
-						DgvCmd.CurrentCell = DgvCmd[0, 0];
-					}
-
-					break;
-
-				default:
+					SubCmdSubAddText("[Click]または[Space]キーで選択");
 					break;
 			}
 		}
@@ -534,8 +547,8 @@ namespace iwm_commandliner2
 
 			switch (e.KeyCode)
 			{
-				case Keys.Enter:
-					SubTbCmdFocus();
+				case Keys.Space:
+					DgvCmd_Click(sender, e);
 					break;
 
 				case Keys.Up:
@@ -571,11 +584,7 @@ namespace iwm_commandliner2
 				case Keys.Tab:
 					_ = TbDgvCmdSearch.Focus();
 					break;
-
-				default:
-					break;
 			}
-
 			DgvCmd.CurrentCell = DgvCmd[0, DgvCmdCurrentRow];
 		}
 
@@ -629,16 +638,6 @@ namespace iwm_commandliner2
 			_ = TbDgvCmdSearch.Focus();
 		}
 
-		private void TbDgvCmdSearch_Enter(object sender, EventArgs e)
-		{
-			TbDgvCmdSearch.BackColor = Color.WhiteSmoke;
-		}
-
-		private void TbDgvCmdSearch_Leave(object sender, EventArgs e)
-		{
-			TbDgvCmdSearch.BackColor = Color.LightGray;
-		}
-
 		private void TbDgvCmdSearch_KeyUp(object sender, KeyEventArgs e)
 		{
 			switch (e.KeyCode)
@@ -646,9 +645,6 @@ namespace iwm_commandliner2
 				case Keys.Up:
 				case Keys.Down:
 					_ = DgvCmd.Focus();
-					break;
-
-				default:
 					break;
 			}
 		}
@@ -674,6 +670,316 @@ namespace iwm_commandliner2
 			Thread.Sleep(250);
 		}
 
+		//-------------
+		// Undo／Redo
+		//-------------
+		private void BtnCmdUndo_Click(object sender, EventArgs e)
+		{
+			if (LCmdHistoryPos > 0)
+			{
+				--LCmdHistoryPos;
+				TbCmd.Text = LCmdHistory[LCmdHistoryPos];
+				BtnCmdRedo.Enabled = true;
+			}
+
+			if (LCmdHistoryPos == 0)
+			{
+				BtnCmdUndo.Enabled = false;
+			}
+
+			SubTbCmdFocus(TbCmd.TextLength);
+		}
+
+		private void BtnCmdRedo_Click(object sender, EventArgs e)
+		{
+			int i1 = LCmdHistory.Count - 1;
+
+			if (LCmdHistoryPos < i1)
+			{
+				++LCmdHistoryPos;
+				TbCmd.Text = LCmdHistory[LCmdHistoryPos];
+				BtnCmdUndo.Enabled = true;
+			}
+
+			if (LCmdHistoryPos == i1)
+			{
+				BtnCmdRedo.Enabled = false;
+			}
+
+			SubTbCmdFocus(TbCmd.TextLength);
+		}
+
+		//-------
+		// 実行
+		//-------
+		private void SubTbCmdExec(object sender, EventArgs e)
+		{
+			TbResult.Enabled = false;
+
+			TbCmd.Text = TbCmd.Text.Replace(NL, "").Trim();
+
+			if (TbCmd.Text.Length == 0)
+			{
+				return;
+			}
+
+			// 履歴を追加
+			if (TbCmd.Text.Length > 0 && TbCmd.Text != LCmdHistory[LCmdHistory.Count - 1])
+			{
+				LCmdHistory.Add(TbCmd.Text);
+				LCmdHistoryPos = LCmdHistory.Count - 1;
+
+				BtnCmdUndo.Enabled = true;
+				BtnCmdRedo.Enabled = false;
+			}
+
+			if (TbCmd.Text[0] == '#')
+			{
+				const int aOpMax = 3;
+				string[] aOp = Enumerable.Repeat("", aOpMax).ToArray();
+
+				string str = TbCmd.Text + "\n"; // "\n" => 検索用フラグ
+
+				Regex rgx = null;
+				Match mth = null;
+				int i1 = 0;
+
+				// #command 取得
+				rgx = new Regex("^(?<pattern>.+?)\\s", RegexOptions.None);
+				mth = rgx.Match(str);
+				aOp[i1] = mth.Groups["pattern"].Value;
+
+				// option[n] 取得
+				rgx = new Regex("\"(?<pattern>.*?)\"", RegexOptions.None);
+
+				for (mth = rgx.Match(str); mth.Success; mth = mth.NextMatch())
+				{
+					if (++i1 >= aOpMax)
+					{
+						break;
+					}
+					aOp[i1] = mth.Groups["pattern"].Value;
+				}
+
+				List<string> lTmp = new List<string>();
+
+				// 大小区別しない
+				switch (aOp[0].ToLower())
+				{
+					// 出力クリア
+					case "#clear":
+						TbCmd.Text = "";
+						TbCmdSub.Text = "";
+						TbResult.Text = "";
+						break;
+
+					// 検索（一致）
+					case "#grep":
+						TbResult.Text = RtnTextGrep(TbResult.Text, aOp[1], true);
+						break;
+
+					// 検索（不一致）
+					case "#except":
+						TbResult.Text = RtnTextGrep(TbResult.Text, aOp[1], false);
+						break;
+
+					// 置換
+					case "#replace":
+						TbResult.Text = RtnTextReplace(TbResult.Text, aOp[1], aOp[2]);
+						break;
+
+					// 分割変換（like AWK）
+					case "#split":
+						TbResult.Text = RtnTextSplitCnv(TbResult.Text, aOp[1], aOp[2]);
+						break;
+
+					// 全角変換
+					case "#towide":
+						TbResult.Text = Strings.StrConv(TbResult.Text, VbStrConv.Wide, 0x411);
+						break;
+
+					// 全角変換(数字のみ)
+					case "#tozennum":
+						TbResult.Text = RtnZenNum(TbResult.Text);
+						break;
+
+					// 全角変換(カナのみ)
+					case "#tozenkana":
+						TbResult.Text = RtnZenKana(TbResult.Text);
+						break;
+
+					// 半角変換
+					case "#tonarrow":
+						TbResult.Text = Strings.StrConv(TbResult.Text, VbStrConv.Narrow, 0x411);
+						break;
+
+					// 半角変換(数字のみ)
+					case "#tohannum":
+						TbResult.Text = RtnHanNum(TbResult.Text);
+						break;
+
+					// 半角変換(カナのみ)
+					case "#tohankana":
+						TbResult.Text = RtnHanKana(TbResult.Text);
+						break;
+
+					// 大文字変換
+					case "#toupper":
+						TbResult.Text = TbResult.Text.ToUpper();
+						break;
+
+					// 小文字変換
+					case "#tolower":
+						TbResult.Text = TbResult.Text.ToLower();
+						break;
+
+					// 消去
+					case "#erase":
+						TbResult.Text = RtnTextEraseInLine(TbResult.Text, aOp[1], aOp[2]);
+						break;
+
+					// ソート
+					case "#sort":
+						TbResult.Text = RtnTextSort(TbResult.Text, false);
+						break;
+
+					// ソート後、重複消除
+					case "#uniq":
+						TbResult.Text = RtnTextSort(TbResult.Text, true);
+						break;
+
+					// 空白行削除
+					case "#rmblankln":
+						_ = SB.Clear();
+						foreach (string _s1 in TbResult.Text.Split(SPLITS, StringSplitOptions.None))
+						{
+							string _s2 = _s1.TrimEnd();
+							if (_s2.Length > 0)
+							{
+								_ = SB.Append(_s1 + NL);
+							}
+						}
+						TbResult.Text = SB.ToString();
+						break;
+
+					// 行番号付与
+					case "#addlnnum":
+						int cnt = 0;
+						_ = SB.Clear();
+						foreach (string _s1 in TbResult.Text.Split(SPLITS, StringSplitOptions.None))
+						{
+							_ = SB.Append(string.Format("{0:D8}\t{1}{2}", ++cnt, _s1, NL));
+						}
+						TbResult.Text = SB.ToString();
+						break;
+
+					// ファイル取得
+					case "#wget":
+						System.Net.WebClient wc = new System.Net.WebClient();
+						try
+						{
+							string url = aOp[1];
+							byte[] data = wc.DownloadData(url);
+							if (Regex.IsMatch(url, "^(http|ftp)"))
+							{
+								string s1 = Encoding.GetEncoding(CbTextCode.SelectedItem.ToString()).GetString(data);
+								if (Regex.IsMatch(s1, "charset.*=.*UTF-8", RegexOptions.IgnoreCase))
+								{
+									CbTextCode.Text = GblASTextCode[1];
+								}
+							}
+							_ = NativeMethods.SendMessage(TbResult.Handle, EM_REPLACESEL, 1, Regex.Replace(Encoding.GetEncoding(CbTextCode.SelectedItem.ToString()).GetString(data), "\r*\n", NL));
+						}
+						catch
+						{
+						}
+						wc.Dispose();
+						break;
+
+					// 計算機
+					case "#calc":
+						SubCmdSubAddText(RtnEvalCalc(aOp[1]));
+						break;
+
+					// 現在日時
+					case "#now":
+						SubCmdSubAddText(DateTime.Now.ToString(aOp[1] == "" ? "yyyy/MM/dd(ddd) HH:mm:ss" : aOp[1]));
+						break;
+
+					// バージョン
+					case "#version":
+						SubCmdSubAddText(VERSION);
+						break;
+				}
+
+				TbResult.Enabled = true;
+			}
+			else
+			{
+				MyEvent = new MyEventHandler(EventDataReceived);
+				P1 = new Process();
+				P1.StartInfo.FileName = "cmd.exe";
+				P1.StartInfo.Arguments = "/C " + TbCmd.Text;
+				P1.StartInfo.UseShellExecute = false;
+				P1.StartInfo.RedirectStandardOutput = true;
+				P1.StartInfo.CreateNoWindow = true;
+				P1.StartInfo.StandardOutputEncoding = Encoding.GetEncoding(CbTextCode.SelectedItem.ToString());
+				P1.OutputDataReceived += new DataReceivedEventHandler(ProcessDataReceived);
+				_ = P1.Start();
+				P1.BeginOutputReadLine();
+				// 不可 P.Close() => 終了コードを返さないので書くな!!
+			}
+		}
+
+		private void EventDataReceived(object sender, DataReceivedEventArgs e)
+		{
+			_ = NativeMethods.SendMessage(TbResult.Handle, EM_REPLACESEL, 1, e.Data + NL);
+		}
+
+		private void ProcessDataReceived(object sender, DataReceivedEventArgs e)
+		{
+			_ = Invoke(MyEvent, new object[2] { sender, e });
+		}
+
+		//-------------
+		// 実行／停止
+		//-------------
+		private void BtnCmdExec_Click(object sender, EventArgs e)
+		{
+			SubTbCmdExec(sender, e);
+		}
+
+		private void BtnCmdStop_Click(object sender, EventArgs e)
+		{
+			SubTbCmdFocus(TbCmd.TextLength);
+
+			if (P1 != null)
+			{
+				SubKillProcessTree(P1);
+			}
+		}
+
+		private void SubKillProcessTree(
+			Process p
+		)
+		{
+			string taskkill = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "taskkill.exe");
+			using (Process _p1 = new Process())
+			{
+				try
+				{
+					_p1.StartInfo.FileName = taskkill;
+					_p1.StartInfo.Arguments = string.Format("/PID {0} /T /F", p.Id);
+					_p1.StartInfo.CreateNoWindow = true;
+					_p1.StartInfo.UseShellExecute = false;
+					_ = _p1.Start();
+				}
+				catch
+				{
+				}
+			}
+		}
+
 		//-----------
 		// TbResult
 		//-----------
@@ -681,6 +987,10 @@ namespace iwm_commandliner2
 		{
 			switch (e.KeyCode)
 			{
+				case Keys.Escape:
+					SubTbCmdFocus(TbCmd.TextLength);
+					break;
+
 				case Keys.PageUp:
 					TbResult.SelectionStart = 0;
 					break;
@@ -706,7 +1016,7 @@ namespace iwm_commandliner2
 		{
 			if (TbResult.SelectionLength == 0)
 			{
-				LblResult.Text ="";
+				LblResult.Text = "";
 				return;
 			}
 
@@ -714,8 +1024,7 @@ namespace iwm_commandliner2
 			int iRow = 0;
 			int iCnt = 0;
 
-			string[] splits = { NL };
-			foreach (string _s1 in TbResult.SelectedText.Split(splits, StringSplitOptions.None))
+			foreach (string _s1 in TbResult.SelectedText.Split(SPLITS, StringSplitOptions.None))
 			{
 				++iNL;
 
@@ -727,321 +1036,29 @@ namespace iwm_commandliner2
 				iCnt += _s1.Length;
 			}
 
-			LblResult.Text = iCnt.ToString() + "字(全" + iNL.ToString() + "行／有効" + iRow.ToString() + "行)選択";
+			LblResult.Text = string.Format("{0}字(有効{1}行／全{2}行)選択", iCnt, iRow, iNL);
 		}
 
-		//-------------
-		// Undo／Redo
-		//-------------
-		private void BtnCmdUndo_Click(object sender, EventArgs e)
+		private void TbResult_DragDrop(object sender, DragEventArgs e)
 		{
-			if (LCmdHistoryPos > 0)
+			_ = SB.Clear();
+
+			string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+
+			foreach(string _s1 in files)
 			{
-				--LCmdHistoryPos;
-				TbCmd.Text = LCmdHistory[LCmdHistoryPos];
-				BtnCmdRedo.Enabled = true;
-			}
-
-			if (LCmdHistoryPos == 0)
-			{
-				BtnCmdUndo.Enabled = false;
-			}
-
-			SubTbCmdFocus();
-		}
-
-		private void BtnCmdRedo_Click(object sender, EventArgs e)
-		{
-			int i1 = LCmdHistory.Count - 1;
-
-			if (LCmdHistoryPos < i1)
-			{
-				++LCmdHistoryPos;
-				TbCmd.Text = LCmdHistory[LCmdHistoryPos];
-				BtnCmdUndo.Enabled = true;
-			}
-
-			if (LCmdHistoryPos == i1)
-			{
-				BtnCmdRedo.Enabled = false;
-			}
-
-			SubTbCmdFocus();
-		}
-
-		//-------------
-		// 実行／停止
-		//-------------
-		private void BtnCmdExec_Click(object sender, EventArgs e)
-		{
-			SubTbCmdExec(sender, e);
-		}
-
-		private void BtnCmdStop_Click(object sender, EventArgs e)
-		{
-			SubKillProcessTree(P1);
-			TbCmd_Enter(sender, e);
-		}
-
-		private void SubKillProcessTree(
-			Process p
-		)
-		{
-			string taskkill = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "taskkill.exe");
-			using (Process _p1 = new Process())
-			{
-				try
+				foreach (string _s2 in File.ReadLines(_s1, Encoding.GetEncoding(CbTextCode.SelectedItem.ToString())))
 				{
-					_p1.StartInfo.FileName = taskkill;
-					_p1.StartInfo.Arguments = string.Format("/PID {0} /T /F", p.Id);
-					_p1.StartInfo.CreateNoWindow = true;
-					_p1.StartInfo.UseShellExecute = false;
-					_ = _p1.Start();
-					_ = _p1.WaitForExit(2500);
-					_p1.Close();
-					_p1.Dispose();
-				}
-				catch
-				{
+					_ = SB.Append(_s2.TrimEnd() + NL);
 				}
 			}
+
+			_ = NativeMethods.SendMessage(TbResult.Handle, EM_REPLACESEL, 1, SB.ToString());
 		}
 
-		//-------
-		// 実行
-		//-------
-		private void SubTbCmdExec(object sender, EventArgs e)
+		private void TbResult_DragEnter(object sender, DragEventArgs e)
 		{
-			TbResult.Enabled = false;
-
-			TbCmd.Text = TbCmd.Text.Replace(NL, null).Trim();
-
-			if (TbCmd.Text.Length == 0)
-			{
-				return;
-			}
-
-			// 履歴を追加
-			if (TbCmd.Text.Length > 0 && TbCmd.Text != LCmdHistory[LCmdHistory.Count - 1])
-			{
-				LCmdHistory.Add(TbCmd.Text);
-				LCmdHistoryPos = LCmdHistory.Count - 1;
-
-				BtnCmdUndo.Enabled = true;
-				BtnCmdRedo.Enabled = false;
-			}
-
-			if (TbCmd.Text[0] == '#')
-			{
-				const int aOpMax = 3;
-				string[] aOp = Enumerable.Repeat("", aOpMax).ToArray();
-
-				string str = TbCmd.Text + "\n";// "\n" => 検索用フラグ
-
-				Regex rgx = null;
-				Match mth = null;
-				int i1 = 0;
-
-				// #command 取得
-				rgx = new Regex("^\\s*(?<pattern>.+?)\\s", RegexOptions.None);
-				mth = rgx.Match(str);
-				aOp[i1] = mth.Groups["pattern"].Value;
-
-				// option[n] 取得
-				rgx = new Regex("\"(?<pattern>[\\S\\s]+?)\"[\\s\\n]", RegexOptions.None);
-				for (mth = rgx.Match(str); mth.Success; mth = mth.NextMatch())
-				{
-					if (++i1 >= aOpMax)
-					{
-						break;
-					}
-					aOp[i1] = mth.Groups["pattern"].Value;
-				}
-
-				List<string> lTmp = new List<string>();
-
-				// 大小区別しない
-				switch (aOp[0].ToLower())
-				{
-					// 検索（一致）
-					case "#grep":
-						SubTextBoxGrep(TbResult, aOp[1], true);
-						break;
-
-					// 検索（不一致）
-					case "#except":
-						SubTextBoxGrep(TbResult, aOp[1], false);
-						break;
-
-					// 置換
-					case "#replace":
-						SubTextBoxReplace(TbResult, aOp[1], aOp[2]);
-						break;
-
-					// 分割変換（like AWK）
-					case "#split":
-						SubTextBoxSplitCnv(TbResult, aOp[1], aOp[2]);
-						break;
-
-					// 全角変換
-					case "#towide":
-						TbResult.Text = Strings.StrConv(TbResult.Text, VbStrConv.Wide, 0x411);
-						SubTbResultFocus();
-						break;
-
-					// 半角変換
-					case "#tonarrow":
-						TbResult.Text = Strings.StrConv(TbResult.Text, VbStrConv.Narrow, 0x411);
-						SubTbResultFocus();
-						break;
-
-					// 大文字変換
-					case "#toupper":
-						TbResult.Text = TbResult.Text.ToUpper();
-						SubTbResultFocus();
-						break;
-
-					// 小文字変換
-					case "#tolower":
-						TbResult.Text = TbResult.Text.ToLower();
-						SubTbResultFocus();
-						break;
-
-					// 消去
-					case "#erase":
-						SubTextBoxEraseInLine(TbResult, aOp[1], aOp[2]);
-						break;
-
-					// ソート
-					case "#sort":
-						SubTextBoxSort(TbResult, false);
-						break;
-
-					// ソート後、重複消除
-					case "#uniq":
-						SubTextBoxSort(TbResult, true);
-						break;
-
-					// 空白行削除
-					case "#x1":
-						bool bLines = false;// 2行目以降か？
-						_ = SB.Clear();
-						foreach (string _s1 in TbResult.Text.Split('\n'))
-						{
-							string _s2 = _s1.TrimEnd();
-							if (_s2.Length > 0)
-							{
-								// 2行目～
-								if (bLines)
-								{
-									_ = SB.Append(NL + _s2);
-								}
-								// 1行目
-								else
-								{
-									_ = SB.Append(_s2);
-									bLines = true;
-								}
-							}
-						}
-						TbResult.Text = SB.ToString();
-						SubTbResultFocus();
-						break;
-
-					// 行番号付与
-					case "#x2":
-						uint cnt = 0;
-						_ = SB.Clear();
-						foreach (string _s1 in TbResult.Text.Split('\n'))
-						{
-							_ = SB.Append(string.Format("{0:D8}\t{1}{2}", ++cnt, _s1.TrimEnd(), NL));
-						}
-						TbResult.Text = SB.ToString();
-						SubTbResultFocus();
-						break;
-
-					// 行数カウント
-					case "#x3":
-						uint cntAll = 0;
-						uint cntActive = 0;
-						foreach (string _s1 in TbResult.Text.Split('\n'))
-						{
-							++cntAll;
-
-							if (_s1.TrimStart().Length > 0)
-							{
-								++cntActive;
-							}
-						}
-						SubTbResultFocus();
-						_ = SendMessage(TbResult.Handle, EM_REPLACESEL, 1, string.Format("{3}{2}全行数　 : {0}{3}有効行数 : {1}{3}{2}", cntAll, cntActive, LN, NL));
-						break;
-
-					// 計算機
-					case "#calc":
-						using (DataTable dt = new DataTable())
-						{
-							try
-							{
-								TbCmdSub.Text = dt.Compute(aOp[1], "").ToString().TrimEnd('.', '0');
-							}
-							catch
-							{
-								TbCmdSub.Text = "";
-							}
-						}
-						break;
-
-					// Windows 電卓
-					case "#ms-calc":
-						_ = Process.Start("calc.exe");
-						break;
-
-					// Windows メモ帳
-					case "#ms-edit":
-						_ = Process.Start("notepad.exe");
-						break;
-
-					// 現在日時
-					case "#now":
-						TbCmdSub.Text = DateTime.Now.ToString(aOp[1] == "" ? "yyyy/MM/dd(ddd) HH:mm:ss" : aOp[1]);
-						break;
-
-					// バージョン
-					case "#version":
-						TbCmdSub.Text = VERSION;
-						break;
-
-					default:
-						break;
-				}
-
-				TbResult.Enabled = true;
-			}
-			else
-			{
-				MyEvent = new MyEventHandler(EventDataReceived);
-				P1 = new Process();
-				P1.StartInfo.FileName = "cmd.exe";
-				P1.StartInfo.Arguments = "/C " + TbCmd.Text;
-				P1.StartInfo.UseShellExecute = false;
-				P1.StartInfo.RedirectStandardOutput = true;
-				P1.StartInfo.CreateNoWindow = true;
-				P1.OutputDataReceived += new DataReceivedEventHandler(ProcessDataReceived);
-				_ = P1.Start();
-				P1.BeginOutputReadLine();
-				// 不可 P.Close() => 終了コードを返さないので書くな!!
-			}
-		}
-
-		private void EventDataReceived(object sender, DataReceivedEventArgs e)
-		{
-			_ = SendMessage(TbResult.Handle, EM_REPLACESEL, 1, e.Data + NL);
-		}
-
-		private void ProcessDataReceived(object sender, DataReceivedEventArgs e)
-		{
-			_ = Invoke(MyEvent, new object[2] { sender, e });
+			e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
 		}
 
 		//------------
@@ -1072,19 +1089,21 @@ namespace iwm_commandliner2
 			}
 		}
 
+		private void CmsResult_全選択_Click(object sender, EventArgs e)
+		{
+			TbResult.SelectAll();
+			TbResult_MouseUp(sender, null);
+		}
+
 		private void CmsResult_全クリア_Click(object sender, EventArgs e)
 		{
 			TbResult.Text = "";
 		}
 
-		private void CmsResult_全選択_Click(object sender, EventArgs e)
+		private void CmsResult_全コピー_Click(object sender, EventArgs e)
 		{
 			TbResult.SelectAll();
-		}
-
-		private void CmsResult_切り取り_Click(object sender, EventArgs e)
-		{
-			TbResult.Cut();
+			TbResult.Copy();
 		}
 
 		private void CmsResult_コピー_Click(object sender, EventArgs e)
@@ -1092,9 +1111,27 @@ namespace iwm_commandliner2
 			TbResult.Copy();
 		}
 
+		private void CmsResult_切り取り_Click(object sender, EventArgs e)
+		{
+			TbResult.Cut();
+		}
+
 		private void CmsResult_貼り付け_Click(object sender, EventArgs e)
 		{
-			_ = SendMessage(TbResult.Handle, EM_REPLACESEL, 1, Regex.Replace(Clipboard.GetText(), "\r*\n", NL));
+			_ = NativeMethods.SendMessage(TbResult.Handle, EM_REPLACESEL, 1, Regex.Replace(Clipboard.GetText(), "\r*\n", NL));
+		}
+
+		private void CmsResult_ファイル名を貼り付け_Click(object sender, EventArgs e)
+		{
+			_ = SB.Clear();
+
+			StringCollection files = Clipboard.GetFileDropList();
+			foreach (string _s1 in files)
+			{
+				_ = SB.Append(_s1 + NL);
+			}
+
+			_ = NativeMethods.SendMessage(TbResult.Handle, EM_REPLACESEL, 1, SB.ToString());
 		}
 
 		private void CmsResult_名前を付けて保存_ShiftJIS_Click(object sender, EventArgs e)
@@ -1192,20 +1229,15 @@ namespace iwm_commandliner2
 		// TextBox へフォーカス
 		//-----------------------
 		// TbCmd
-		private void SubTbCmdFocus()
+		private void SubTbCmdFocus(
+			int iPos
+		)
 		{
-			TbCmd.Text = TbCmd.Text.Trim();
-
-			// カーソル位置を末尾へ移動
-			TbCmd.Select(TbCmd.TextLength, 0);
+			if (iPos >= 0)
+			{
+				TbCmd.SelectionStart = iPos;
+			}
 			_ = TbCmd.Focus();
-		}
-
-		// TbResult
-		private void SubTbResultFocus()
-		{
-			// カーソル位置を末尾へ移動
-			TbResult.Select(TbResult.TextLength, 0);
 		}
 
 		//-----------------------
@@ -1225,19 +1257,20 @@ namespace iwm_commandliner2
 				FilterIndex = 1
 			}
 			)
-
-			if (saveFileDialog1.ShowDialog() == DialogResult.OK)
 			{
-				switch (code.ToUpper())
+				if (saveFileDialog1.ShowDialog() == DialogResult.OK)
 				{
-					case "UTF-8N":
-						UTF8Encoding utf8nEnc = new UTF8Encoding(false);
-						File.WriteAllText(saveFileDialog1.FileName, tb.Text, utf8nEnc);
-						break;
+					switch (code.ToUpper())
+					{
+						case "UTF-8N":
+							UTF8Encoding utf8nEnc = new UTF8Encoding(false);
+							File.WriteAllText(saveFileDialog1.FileName, tb.Text, utf8nEnc);
+							break;
 
-					default:
-						File.WriteAllText(saveFileDialog1.FileName, tb.Text, Encoding.GetEncoding("Shift_JIS"));
-						break;
+						default:
+							File.WriteAllText(saveFileDialog1.FileName, tb.Text, Encoding.GetEncoding("Shift_JIS"));
+							break;
+					}
 				}
 			}
 		}
@@ -1245,15 +1278,16 @@ namespace iwm_commandliner2
 		//---------------
 		// 正規表現検索
 		//---------------
-		private void SubTextBoxGrep(
-			TextBox tb,
+		private string RtnTextGrep(
+			string str,
 			string sRegex,
 			bool bMatch
 		)
 		{
 			if (sRegex.Length == 0)
 			{
-				return;
+				SubCmdSubAddText(@"正規表現による検索：\t \n \\ \. etc.");
+				return str;
 			}
 
 			// 特殊文字を置換
@@ -1267,13 +1301,12 @@ namespace iwm_commandliner2
 			}
 			catch
 			{
-				return;
+				return str;
 			}
 
 			_ = SB.Clear();
 
-			string[] splits = { NL };
-			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
+			foreach (string _s1 in str.Split(SPLITS, StringSplitOptions.None))
 			{
 				if (bMatch == rgx.IsMatch(_s1))
 				{
@@ -1281,22 +1314,22 @@ namespace iwm_commandliner2
 				}
 			}
 
-			tb.Text = SB.ToString();
-			tb.Select(tb.TextLength, 0);
+			return SB.ToString();
 		}
 
 		//---------------
 		// 正規表現置換
 		//---------------
-		private void SubTextBoxReplace(
-			TextBox tb,
+		private string RtnTextReplace(
+			string str,
 			string sOld,
 			string sNew
 		)
 		{
 			if (sOld.Length == 0)
 			{
-				return;
+				SubCmdSubAddText(@"正規表現による検索：\t \n \\ \. etc.");
+				return str;
 			}
 
 			// 特殊文字を置換
@@ -1314,33 +1347,32 @@ namespace iwm_commandliner2
 			}
 			catch
 			{
-				return;
+				return str;
 			}
 
 			_ = SB.Clear();
 
-			string[] splits = { NL };
-			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
+			foreach (string _s1 in str.Split(SPLITS, StringSplitOptions.None))
 			{
 				_ = SB.Append(rgx.Replace(_s1, sNew) + NL);
 			}
 
-			tb.Text = SB.ToString();
-			tb.Select(tb.TextLength, 0);
+			return SB.ToString();
 		}
 
 		//-----------
 		// 分割変換
 		//-----------
-		private void SubTextBoxSplitCnv(
-			TextBox tb,
+		private string RtnTextSplitCnv(
+			string str,
 			string sSplit,
 			string sRegex
 		)
 		{
 			if (sSplit.Length == 0 || sRegex.Length == 0)
 			{
-				return;
+				SubCmdSubAddText(@"正規表現による検索：\t \n \\ \. etc.");
+				return str;
 			}
 
 			// 特殊文字を置換
@@ -1355,13 +1387,12 @@ namespace iwm_commandliner2
 			}
 			catch
 			{
-				return;
+				return str;
 			}
 
 			_ = SB.Clear();
 
-			string[] splits = { NL };
-			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
+			foreach (string _s1 in str.Split(SPLITS, StringSplitOptions.None))
 			{
 				if (_s1.Length > 0)
 				{
@@ -1385,15 +1416,54 @@ namespace iwm_commandliner2
 				}
 			}
 
-			tb.Text = SB.ToString();
-			tb.Select(tb.TextLength, 0);
+			return SB.ToString();
+		}
+
+		//----------------
+		// 全角 <=> 半角
+		//----------------
+		private static string RtnZenNum(string s)
+		{
+			Regex rgx = new Regex(@"\d+");
+			return  rgx.Replace(s, RtnReplacerWide);
+		}
+
+		private static string RtnHanNum(string s)
+		{
+			// 全角０-９ Unicode
+			Regex rgx = new Regex(@"[\uff10-\uff19]+");
+			return rgx.Replace(s, RtnReplacerNarrow);
+		}
+
+		private static string RtnZenKana(string s)
+		{
+			// 半角カナ Unicode
+			Regex rgx = new Regex(@"[\uff61-\uFF9f]+");
+			return rgx.Replace(s, RtnReplacerWide);
+		}
+
+		private static string RtnHanKana(string s)
+		{
+			// 全角カナ Unicode
+			Regex rgx = new Regex(@"[\u30A1-\u30F6]+");
+			return rgx.Replace(s, RtnReplacerNarrow);
+		}
+
+		private static string RtnReplacerWide(Match m)
+		{
+			return Strings.StrConv(m.Value, VbStrConv.Wide, 0x411);
+		}
+
+		private static string RtnReplacerNarrow(Match m)
+		{
+			return Strings.StrConv(m.Value, VbStrConv.Narrow, 0x411);
 		}
 
 		//-----------
 		// 文字消去
 		//-----------
-		private void SubTextBoxEraseInLine(
-			TextBox tb,
+		private string RtnTextEraseInLine(
+			string str,
 			string sBgnPos,
 			string sEndPos
 		)
@@ -1405,7 +1475,7 @@ namespace iwm_commandliner2
 			}
 			catch
 			{
-				iBgnPos = 0;
+				return str;
 			}
 
 			int iEndPos;
@@ -1415,82 +1485,73 @@ namespace iwm_commandliner2
 			}
 			catch
 			{
-				iEndPos = -1;
+				return str;
 			}
 
 			_ = SB.Clear();
 
-			string[] splits = { NL };
-			foreach (string _s1 in tb.Text.Split(splits, StringSplitOptions.None))
+			foreach (string _s1 in str.Split(SPLITS, StringSplitOptions.None))
 			{
-				_ = SB.Append(RtnErasePos(_s1, " ", iBgnPos, iEndPos) + NL);
+				_ = SB.Append(RtnEraseLen(_s1, ' ', iBgnPos, iEndPos) + NL);
 			}
 
-			tb.Text = SB.ToString();
-			tb.Select(tb.TextLength, 0);
+			return SB.ToString();
 		}
 
-		private string RtnErasePos(
-			string sStr = "",
-			string sRep = "",
-			int iBgnPos = 0, // 例： 0.. 4
-			int iEndPos = -1 // 例：-5..-1
+		private string RtnEraseLen(
+			string str = "",
+			char cRep = ' ',
+			int iBgnPos = 0,
+			int iLen = 0
 		)
 		{
+			// 範囲チェック
+			if (str.Length == 0 || iBgnPos > str.Length || iLen <= 0)
+			{
+				return str;
+			}
+
+			int iEndPos = iBgnPos + iLen;
+
+			// iEndPos の正位置は？
+			if (iEndPos <= 0)
+			{
+				iEndPos += str.Length;
+
+				if (iEndPos < 0)
+				{
+					return str;
+				}
+			}
+			else if (iEndPos > str.Length)
+			{
+				iEndPos = str.Length;
+			}
+
 			// iBgnPos の正位置は？
 			if (iBgnPos < 0)
 			{
-				// マイナスのとき +1
-				iBgnPos += sStr.Length + 1;
-			}
+				iBgnPos += str.Length;
 
-			if (iBgnPos > sStr.Length)
-			{
-				iBgnPos = sStr.Length;
-			}
-
-			// iEndPos の正位置は？
-			if (iEndPos < 0)
-			{
-				// マイナスのとき +1
-				iEndPos += sStr.Length + 1;
-			}
-
-			// Swap
-			if (iBgnPos > iEndPos)
-			{
-				int _i1 = iEndPos;
-				iEndPos = iBgnPos;
-				iBgnPos = _i1;
-			}
-
-			// 最終補正
-			if (iBgnPos < 0)
-			{
-				iBgnPos = 0;
-			}
-
-			if (iEndPos > sStr.Length)
-			{
-				iEndPos = sStr.Length;
+				if (iBgnPos < 0)
+				{
+					iBgnPos = 0;
+				}
 			}
 
 			string rtn = "";
 
 			// 前
-			if (iBgnPos > 0)
-			{
-				rtn += sStr.Substring(0, iBgnPos);
-			}
+			rtn += str.Substring(0, iBgnPos);
 
 			// 中
-			for (int _i1 = 0; _i1 < (iEndPos - iBgnPos); _i1++)
+			for (int _i1 = iBgnPos; _i1 < iEndPos; _i1++)
 			{
-				rtn += sRep;
+				rtn += cRep;
 			}
 
 			// 後
-			rtn += sStr.Substring(iEndPos);
+			rtn += str.Substring(iEndPos, str.Length - iEndPos);
 
 			return rtn;
 		}
@@ -1498,13 +1559,14 @@ namespace iwm_commandliner2
 		//-------------
 		// Sort／Uniq
 		//-------------
-		private void SubTextBoxSort(
-			TextBox tb,
+		private string RtnTextSort(
+			string str,
 			bool bUniq = false
 		)
 		{
 			List<string> l1 = new List<string>();
-			foreach (string _s1 in tb.Text.Split('\n'))
+
+			foreach (string _s1 in str.Split(SPLITS, StringSplitOptions.None))
 			{
 				string _s2 = _s1.TrimEnd();
 				if (_s2.Length > 0)
@@ -1527,8 +1589,7 @@ namespace iwm_commandliner2
 				_ = SB.Append(_s1 + NL);
 			}
 
-			tb.Text = SB.ToString();
-			tb.Select(tb.TextLength, 0);
+			return SB.ToString();
 		}
 
 		//-----------------------
@@ -1549,6 +1610,76 @@ namespace iwm_commandliner2
 				{
 					rtn.Add(_s1);
 					s1 = _s1;
+				}
+			}
+
+			return rtn;
+		}
+
+		//-----------
+		// Eval計算
+		//-----------
+		private string RtnEvalCalc(
+			string str
+		)
+		{
+			string rtn = str.ToLower().Replace(" ", "");
+
+			// Help
+			if (rtn.Length == 0)
+			{
+				return "pi, e, sin(n), cos(n), tan(n), sqrt(n), pow(n,n)";
+			}
+
+			using (DataTable dt = new DataTable())
+			{
+				try
+				{
+					// 定数
+					rtn = rtn.Replace("pi", Math.PI.ToString());
+					rtn = rtn.Replace("e", Math.E.ToString());
+
+					// sin(n) cos(n) tan(n) sqrt(n)
+					string[] aMath = { "sin", "cos", "tan", "sqrt" };
+					foreach (string _s1 in aMath)
+					{
+						foreach (Match _m1 in Regex.Matches(rtn, _s1 + @"\(\d+\.*\d*\)"))
+						{
+							string _s2 = _m1.Value;
+							_s2 = _s2.Replace(_s1 + "(", "");
+							_s2 = _s2.Replace(")", "");
+
+							double _d1 = double.Parse(_s2);
+
+							switch (_s1)
+							{
+								case "sin": _d1 = Math.Sin(_d1 * Math.PI / 180); break;
+								case "cos": _d1 = Math.Cos(_d1 * Math.PI / 180); break;
+								case "tan": _d1 = Math.Tan(_d1 * Math.PI / 180); break;
+								case "sqrt": _d1 = Math.Sqrt(_d1); break;
+								default: _d1 = 0; break;
+							}
+
+							rtn = rtn.Replace(_m1.Value, _d1.ToString());
+						}
+					}
+
+					// pow(n,n)
+					foreach (Match _m1 in Regex.Matches(rtn, @"pow\(\d+\.*\d*\,\d+\)"))
+					{
+						string _s2 = _m1.Value;
+						_s2 = _s2.Replace("pow(", "");
+						_s2 = _s2.Replace(")", "");
+
+						string[] _a1 = _s2.Split(',');
+						rtn = rtn.Replace(_m1.Value, Math.Pow(double.Parse(_a1[0]), int.Parse(_a1[1])).ToString());
+					}
+
+					rtn = dt.Compute(rtn, "").ToString();
+				}
+				catch
+				{
+					rtn = "Err";
 				}
 			}
 

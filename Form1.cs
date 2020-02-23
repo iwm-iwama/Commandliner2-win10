@@ -23,7 +23,7 @@ namespace iwm_commandliner2
 		//-----------
 		// 大域定数
 		//-----------
-		private const string VERSION = "Ver.20200223_1625 'A-29' (C)2018-2020 iwm-iwama";
+		private const string VERSION = "Ver.20200223_2332 'A-29' (C)2018-2020 iwm-iwama";
 
 		private const string NL = "\r\n";
 		private readonly string[] SPLITS = { NL };
@@ -1308,9 +1308,10 @@ namespace iwm_commandliner2
 
 			foreach (string _s1 in str.Split(SPLITS, StringSplitOptions.None))
 			{
-				if (bMatch == rgx.IsMatch(_s1))
+				string _s2 = _s1 + NL;
+				if (bMatch == rgx.IsMatch(_s2))
 				{
-					_ = SB.Append(_s1 + NL);
+					_ = SB.Append(_s2);
 				}
 			}
 

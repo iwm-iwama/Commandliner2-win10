@@ -23,7 +23,7 @@ namespace iwm_commandliner2
 		//-----------
 		// 大域定数
 		//-----------
-		private const string VERSION = "Ver.20200224_1829 'A-29' (C)2018-2020 iwm-iwama";
+		private const string VERSION = "Ver.20200224_2328 'A-29' (C)2018-2020 iwm-iwama";
 
 		private const string NL = "\r\n";
 		private readonly string[] SPLITS = { NL };
@@ -915,7 +915,7 @@ namespace iwm_commandliner2
 
 					// 現在日時
 					case "#now":
-						SubCmdSubAddText(DateTime.Now.ToString(aOp[1] == "" ? "yyyy/MM/dd(ddd) HH:mm:ss" : aOp[1]));
+						SubCmdSubAddText(DateTime.Now.ToString("yyyy/MM/dd(ddd) HH:mm:ss"));
 						break;
 
 					// バージョン
@@ -1088,19 +1088,6 @@ namespace iwm_commandliner2
 			TbResult.ScrollToCaret();
 		}
 
-		private void CmsResult_選択文字列を実行_Click(object sender, EventArgs e)
-		{
-			string cmd = TbResult.SelectedText.Trim();
-			try
-			{
-				_ = Process.Start(cmd);
-			}
-			catch
-			{
-				_ = MessageBox.Show($"[実行できない文字列]{NL}\"{cmd}\"");
-			}
-		}
-
 		private void CmsResult_全選択_Click(object sender, EventArgs e)
 		{
 			TbResult.SelectAll();
@@ -1140,7 +1127,7 @@ namespace iwm_commandliner2
 			StringCollection files = Clipboard.GetFileDropList();
 			foreach (string _s1 in files)
 			{
-				_ = SB.Append(_s1 + NL);
+				_ = SB.Append(_s1 + (Directory.Exists(_s1) ? @"\" : null) + NL);
 			}
 
 			_ = NativeMethods.SendMessage(TbResult.Handle, EM_REPLACESEL, 1, SB.ToString());

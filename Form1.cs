@@ -23,7 +23,7 @@ namespace iwm_commandliner2
 		//-----------
 		// 大域定数
 		//-----------
-		private const string VERSION = "Ver.20200224_1456 'A-29' (C)2018-2020 iwm-iwama";
+		private const string VERSION = "Ver.20200224_1829 'A-29' (C)2018-2020 iwm-iwama";
 
 		private const string NL = "\r\n";
 		private readonly string[] SPLITS = { NL };
@@ -177,6 +177,17 @@ namespace iwm_commandliner2
 			TbResult.Enabled = true;
 		}
 
+		private void TbCmd_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			switch (e.KeyChar)
+			{
+				// IME入力対策
+				case (char)Keys.Enter:
+					SubTbCmdExec(sender, null);
+					break;
+			}
+		}
+
 		private void TbCmd_KeyUp(object sender, KeyEventArgs e)
 		{
 			TbCmd_MouseClick(sender, null);
@@ -200,7 +211,8 @@ namespace iwm_commandliner2
 					break;
 
 				case Keys.Enter:
-					SubTbCmdExec(sender, null);
+					// KeyPressと連動
+					TbCmd.Text = TbCmd.Text.Replace(NL, "");
 					SubTbCmdFocus(TbCmd.TextLength);
 					break;
 
@@ -716,7 +728,7 @@ namespace iwm_commandliner2
 		{
 			TbResult.Enabled = false;
 
-			TbCmd.Text = TbCmd.Text.Replace(NL, "").Trim();
+			TbCmd.Text = TbCmd.Text.Trim();
 
 			if (TbCmd.Text.Length == 0)
 			{

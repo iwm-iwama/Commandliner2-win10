@@ -327,6 +327,7 @@
 			this.TbCmd.DragDrop += new System.Windows.Forms.DragEventHandler(this.TbCmd_DragDrop);
 			this.TbCmd.DragEnter += new System.Windows.Forms.DragEventHandler(this.TbCmd_DragEnter);
 			this.TbCmd.Enter += new System.EventHandler(this.TbCmd_Enter);
+			this.TbCmd.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TbCmd_KeyPress);
 			this.TbCmd.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TbCmd_KeyUp);
 			this.TbCmd.MouseHover += new System.EventHandler(this.TbCmd_MouseHover);
 			// 

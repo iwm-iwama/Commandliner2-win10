@@ -23,7 +23,7 @@ namespace iwm_commandliner2
 		//-----------
 		// 大域定数
 		//-----------
-		private const string VERSION = "Ver.20200225_1922 'A-29' (C)2018-2020 iwm-iwama";
+		private const string VERSION = "Ver.20200225_2350 'A-29' (C)2018-2020 iwm-iwama";
 
 		private const string NL = "\r\n";
 		private readonly string[] SPLITS = { NL };
@@ -1290,9 +1290,6 @@ namespace iwm_commandliner2
 				return str;
 			}
 
-			// 特殊文字を置換
-			sRegex = sRegex.Replace("|", "\\|");
-
 			Regex rgx;
 
 			try
@@ -1334,8 +1331,8 @@ namespace iwm_commandliner2
 			}
 
 			// 特殊文字を置換
-			sNew = sNew.Replace("\\n", NL);
 			sNew = sNew.Replace("\\t", "\t");
+			sNew = sNew.Replace("\\n", NL);
 			sNew = sNew.Replace("\\\\", "\\");
 			sNew = sNew.Replace("\\\"", "\"");
 			sNew = sNew.Replace("\\\'", "\'");
@@ -1405,8 +1402,8 @@ namespace iwm_commandliner2
 						_s2 = _s2.Replace("[" + _i1.ToString() + "]", a1[_i1]);
 
 						// 特殊文字を置換
-						_s2 = _s2.Replace("\\n", NL);
 						_s2 = _s2.Replace("\\t", "\t");
+						_s2 = _s2.Replace("\\n", NL);
 						_s2 = _s2.Replace("\\\\", "\\");
 						_s2 = _s2.Replace("\\\"", "\"");
 						_s2 = _s2.Replace("\\\'", "\'");

@@ -23,7 +23,7 @@ namespace iwm_commandliner2
 		//-----------
 		// 大域定数
 		//-----------
-		private const string VERSION = "Ver.20200224_2328 'A-29' (C)2018-2020 iwm-iwama";
+		private const string VERSION = "Ver.20200225_1922 'A-29' (C)2018-2020 iwm-iwama";
 
 		private const string NL = "\r\n";
 		private readonly string[] SPLITS = { NL };
@@ -762,7 +762,8 @@ namespace iwm_commandliner2
 				aOp[i1] = mth.Groups["pattern"].Value;
 
 				// option[n] 取得
-				rgx = new Regex("\"(?<pattern>.*?)\"", RegexOptions.None);
+				// "\"" 対応
+				rgx = new Regex("\"(?<pattern>.*?)\"\\s+", RegexOptions.None);
 
 				for (mth = rgx.Match(str); mth.Success; mth = mth.NextMatch())
 				{
